@@ -1,0 +1,76 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/providerattestationapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.providerattestation;
+
+message CreateConfigRequest {
+  // Required. The name of the config.
+  string name = 1;
+}
+
+message CreateConfigResponse {
+  Config config = 1;
+}
+
+message ListConfigsRequest {
+  // Optional. If provided, the filter to list the configs.
+  ConfigFilter filter = 1;
+}
+
+message ListConfigsResponse {
+  repeated Config configs = 1;
+}
+
+message GetConfigRequest {
+  // Required. The id of the config.
+  string id = 1;
+}
+
+message GetConfigResponse {
+  Config config = 1;
+}
+
+message DeleteConfigRequest {
+  // Required. The ID of the config to be deleted.
+  string id = 1;
+}
+
+message DeleteConfigResponse {
+}
+
+message ConfigFilter {
+  // Optional. The name of the config.
+  string name = 1;
+}
+
+message Config {
+  string id = 1;
+  string name = 2;
+}
+
+message AWSConfig {
+  // The ARN of the AWS role to assume, this role needs to be provisioned separately, and should
+  // have the necessary permissions to query EC2 instances.
+  string role_arn = 1;
+}
+
+service API {
+  rpc CreateConfig(CreateConfigRequest) returns (CreateConfigResponse);
+  rpc ListConfigs(ListConfigsRequest) returns (ListConfigsResponse);
+  rpc GetConfig(GetConfigRequest) returns (GetConfigResponse);
+  rpc DeleteConfig(DeleteConfigRequest) returns (DeleteConfigResponse);
+}

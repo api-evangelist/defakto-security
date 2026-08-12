@@ -1,0 +1,90 @@
+generated: '2026-08-12'
+method: generated
+source: grpc/*.proto, https://d.defakto.security/
+note: >-
+  Packaged Agent Skills for the Defakto Management API. Defakto publishes no skills, no
+  AGENTS.md and no llms-full docs bundle, so these are generated. Every operation named in
+  every skill's frontmatter is a real RPC verified against the reconstructed protobuf contract
+  in grpc/ — no operation is invented. CLI commands quoted in the steps are taken from the
+  published spirlctl documentation and release notes.
+  Grounding note: skills are normally grounded in an OpenAPI. This provider has none, so they
+  are grounded in the gRPC service contract instead, which is the actual machine-readable
+  surface here.
+api: defakto-security-management-api
+skills:
+- name: defakto-onboard-trust-domain
+  file: defakto-security-onboard-trust-domain.md
+  summary: >-
+    Stand up a SPIFFE trust domain and attach a Kubernetes cluster so workloads receive SVIDs
+    automatically.
+  services:
+  - trustdomainapi
+  - clusterapi
+  operations: 11
+  min_role: Administrator (trust domain) / Operator (cluster)
+- name: defakto-rotate-signing-keys
+  file: defakto-security-rotate-signing-keys.md
+  summary: >-
+    Run the four-phase prepare / activate / taint / remove key-set rotation without breaking
+    workloads holding credentials chained to the outgoing key.
+  services:
+  - trustdomainapi
+  operations: 12
+  min_role: Manager
+- name: defakto-secretless-cicd
+  file: defakto-security-secretless-cicd.md
+  summary: >-
+    Give a pipeline a Defakto identity with no stored secret, via Workload Identity Federation
+    into a service account, or SPIFFE identities for jobs via a CI/CD profile.
+  services:
+  - accessapi
+  - cicdapi
+  operations: 15
+  min_role: Administrator (WIF issuer) / Operator (CI/CD profile)
+- name: defakto-audit-credential-issuance
+  file: defakto-security-audit-credential-issuance.md
+  summary: >-
+    Inventory non-human identities, reconstruct an issuance timeline, and diagnose why a
+    workload is not receiving an SVID.
+  services:
+  - workloadsapi
+  - statisticsapi
+  - clusterapi
+  operations: 11
+  min_role: Auditor
+coverage:
+  skills: 4
+  services_covered: 6
+  services_total: 16
+  uncovered_services:
+  - configapi
+  - federationapi
+  - realmapi
+  - devidentityapi
+  - scannerapi
+  - alertapi
+  - sessionapi
+  - agentattestationapi
+  - providerattestationapi
+  - listing
+  note: >-
+    Four marquee flows are covered. Ledger (scannerapi), federation, managed configuration and
+    developer identity are real product surfaces that would each warrant a skill in a later
+    round.
+shared_context:
+  transport: gRPC over HTTP/2, TLS, port 443. No REST surface.
+  base_url: https://api.defakto.security
+  clients:
+  - github.com/spirl/spirl-sdk-go
+  - spirlctl
+  - registry.opentofu.org/spirl/spirl
+  error_envelope: google.rpc.Status — not RFC 9457
+  idempotency: none — no client token on any of the 126 RPCs
+  pagination: cursor (page_size 1-1000, page_token, empty next_page_token = last page) where used
+  rate_limits: undocumented
+  cross_links:
+    authentication: authentication/defakto-security-authentication.yml
+    conventions: conventions/defakto-security-conventions.yml
+    errors: errors/defakto-security-problem-types.yml
+    data_model: data-model/defakto-security-data-model.yml
+    events: asyncapi/defakto-security-audit-events.yml

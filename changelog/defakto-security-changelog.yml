@@ -1,0 +1,209 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/releases.md
+note: >-
+  Defakto publishes a separate dated release-notes page per shipped component — eight of them
+  — rather than one product changelog. Entries are categorised (Security Fixes, Bug Fixes,
+  Enhancements, Breaking Changes) and breaking changes are called out under their own heading
+  rather than buried, which is the mark of a changelog written for operators. Security fix
+  entries name the specific upstream CVE and state reachability in Defakto's own deployment
+  context, which is materially better than the usual "updated dependencies" line.
+  There is no product-wide changelog, no RSS/Atom feed for release notes, and no changelog
+  covering the Management API contract itself — API-visible additions have to be inferred from
+  the SDK and CLI notes.
+scheme: per-component semver, dated
+feeds: []
+components:
+- name: spirl-server
+  label: Trust Domain Server
+  url: https://d.defakto.security/releases/spirl-server.md
+  current: 0.38.0
+  distribution:
+  - oci://ghcr.io/spirl/charts/spirl-server:0.38.0
+  - ghcr.io/spirl/spirl-server:v0.38.0
+- name: spirl-system
+  label: Agent-side components
+  url: https://d.defakto.security/releases/spirl-system.md
+  current: 0.43.0
+- name: spirlctl
+  label: CLI
+  url: https://d.defakto.security/releases/spirlctl.md
+  current: 0.35.0
+- name: spirldbg
+  label: Debug utility
+  url: https://d.defakto.security/releases/spirldbg.md
+- name: spirl-perf
+  label: Load testing tool
+  url: https://d.defakto.security/releases/spirl-perf.md
+- name: spirl-sync
+  label: Sync tool
+  url: https://d.defakto.security/releases/spirl-sync.md
+- name: spirl-sdk-go
+  label: Go SDK
+  url: https://d.defakto.security/releases/spirl-sdk-go.md
+  current: v0.3.6
+- name: terraform-provider
+  label: OpenTofu/Terraform provider
+  url: https://d.defakto.security/releases/terraform-provider.md
+  current: v0.13.1
+entries:
+- component: spirlctl
+  version: 0.35.0
+  date: '2026-07-29'
+  breaking: false
+  highlights:
+  - Added `spirlctl iam wif-issuer` commands to manage WIF issuers from the CLI.
+  - Added `spirlctl iam service-account wif-config` commands for service account WIF configurations.
+  - '`trust-domain create`/`update` accept `--oauth-issuer`, `--no-oauth-issuer`, `--builtin-oauth-issuer`; `trust-domain info` reports the OAuth issuer configuration.'
+  fixes:
+  - Fixed telemetry sharing endpoint which was rejecting all requests.
+- component: spirl-server
+  version: 0.38.0
+  date: '2026-07-24'
+  breaking: false
+  security:
+  - >-
+    Updated go-attestation (TPM attestors), grpc, x/text, kin-openapi and cel-go to pick up
+    upstream CVE fixes.
+  highlights:
+  - Azure IMDS attestor caches Microsoft CA intermediates, removing an external network dependency from the attestation path.
+  - GCP Key Manager supports `destroyScheduledDuration` (24 hours to 120 days) for KMS soft-delete.
+  - Venafi Firefly container updated to v1.12.0.
+- component: spirl-server
+  version: 0.37.0
+  date: '2026-07-10'
+  breaking: false
+  highlights:
+  - Agents can identify their cluster by name (`agent.auth.clusterName`) instead of a Defakto-generated cluster ID.
+  - TLS termination supported on the agent and Serverless APIs.
+  - OCSF audit log emission added, consumable by SIEMs expecting the open schema.
+  - GCP Certificate Authority Service supported as an upstream signing authority.
+  - nodeSelector/affinity/tolerations configurable on Jobs and CronJobs.
+- component: spirlctl
+  version: 0.34.0
+  date: '2026-06-23'
+  breaking: false
+  highlights:
+  - '`spirlctl login` supports HTTP/1.1 and short connection timeouts, working around proxies that do not support HTTP/2 (Zscaler, CrowdStrike, F5) and GCP ALB 30s timeouts.'
+- component: spirl-sdk-go
+  version: v0.3.6
+  date: '2026-06-11'
+  breaking: false
+  highlights:
+  - Adds the `agentattestation` API to the SDK.
+- component: spirlctl
+  version: 0.33.0
+  date: '2026-06-11'
+  breaking: false
+  highlights:
+  - 'Ledger (NHI visibility, risk management and secret eradication) reached General Availability; commands under `spirlctl ledger`.'
+  - '`spirlctl cluster info` and `node-group info` support `--output json`.'
+- component: spirl-sdk-go
+  version: v0.3.5
+  date: '2026-06-03'
+  breaking: false
+  highlights:
+  - Added `configsdk` for reading/updating organization, trust domain and cluster configurations.
+  - Added trust domain authority status reads and `JwtIssuerConfig` support.
+  - Added describe-cluster-by-ID.
+  - SDK name and version now sent on outgoing requests, defaulting to `sdk` with no version.
+- component: spirl-server
+  version: 0.36.1
+  date: '2026-05-27'
+  breaking: false
+  fixes:
+  - Fixed x509 subject template rendering on the SVIDIssuancePolicy.
+- component: spirl-server
+  version: 0.36.0
+  date: '2026-05-22'
+  breaking: false
+  security:
+  - Updated x/crypto, x/net and go-git/v5 for upstream CVE fixes.
+  highlights:
+  - '`AdditionalClaims` on the JWT SVID Issuance Policy, taking precedence over `JWTCustomizationTemplate`.'
+  - JWT-SVID Issuance Policy now enforces a 5 minute minimum TTL to prevent misconfiguration.
+  - Kubernetes Token Attestor supports manual JWKS configuration (`jwksURI`, `jwks`).
+- component: spirl-server
+  version: 0.34.0
+  date: '2026-05-13'
+  breaking: false
+  security:
+  - >-
+    Rebuilt with Go 1.26.3. Of the 11 CVEs the Go security team published on 2026-05-07,
+    CVE-2026-33814 was reachable in the agent's Sigstore image-signature verification and the
+    customer-configured webhook extension paths; the other 10 do not affect spirl-server in
+    Defakto's deployment context.
+  - Updated go-git/v5 and in-toto-golang.
+- component: spirlctl
+  version: 0.32.0
+  date: '2026-05-01'
+  breaking: false
+  highlights:
+  - Developer Identity commands promoted out of experimental — `spirlctl dev-id` replaces `spirlctl exp dev-id`.
+  - Signing key rotation can be initiated from the CLI to force an early rotation.
+- component: spirlctl
+  version: 0.31.0
+  date: '2026-04-15'
+  breaking: false
+  highlights:
+  - '`spirlctl config validate {org,trust-domain,trust-domain-deployment,cluster}` validates Managed Configuration YAML without persisting.'
+- component: spirlctl
+  version: 0.30.0
+  date: '2026-03-26'
+  breaking: false
+  highlights:
+  - Trust bundle rotation schedule and signing key metadata added to `trust-domain info`.
+  - '`cluster workloads list`, `node-group workloads list`, `node-group list-nodes` added.'
+  - Active agent/workload counts on `cluster info`; active cluster/federation counts on `trust-domain list`; federation status and last poll date on `federation list`.
+  - '`--output-helm-values` on trust domain deployment registration; `--output json` on `trust-domain info`.'
+  fixes:
+  - '`cluster list` now includes Linux runtime clusters (node-groups), which it previously omitted.'
+- component: spirlctl
+  version: 0.29.0
+  date: '2026-02-12'
+  breaking: false
+  highlights:
+  - Configurable default `jwt_issuer_url` for the `iss` claim in JWT-SVIDs (built-in, disabled, or custom HTTPS OIDC issuer), synchronized to all trust domain deployments.
+  - Extension promoted to production ready; `--x` prefix removed from extension configuration flags.
+  - Config count removed from `cluster list` (available via `cluster info`).
+- component: spirlctl
+  version: 0.28.0
+  date: '2026-01-19'
+  breaking: false
+  highlights:
+  - New trust domains default to self-hosted unless `--self-hosted=false`.
+  - DevID path template configurable in policy.
+  - Limited JWT-SVID support via the DevID Workload API (`spirlctl exp dev-id serve --jwt`).
+- component: spirlctl
+  version: 0.27.0
+  date: '2025-12-03'
+  breaking: true
+  breaking_changes:
+  - Removed `spirlctl cluster workloads list` and `spirlctl node-group list-nodes`.
+  - Removed active agent and active workload counts from `cluster info` and `cluster config list`.
+  - Removed active cluster and active federation link counts from `trust-domain list`.
+  - Removed last poll date and status from `federation list`.
+  highlights:
+  - Realms commands moved out of experimental.
+  - '`cluster list` supports filtering by realm.'
+  - Agent Attestation configurable for new and existing clusters.
+  note: >-
+    Worth flagging: every capability removed in 0.27.0 was reintroduced in 0.30.0 three
+    months later. A reader tracking this API should treat the 0.27–0.30 window as churn
+    rather than a durable contract change.
+- component: spirl-sdk-go
+  version: v0.2.0
+  date: '2025-12-02'
+  breaking: false
+  highlights:
+  - Added realm management and realm role management support.
+- component: spirl-sdk-go
+  version: v0.1.0
+  date: '2025-03-28'
+  breaking: false
+  highlights:
+  - Initial release.
+window:
+  from: '2025-03-28'
+  to: '2026-07-29'
+  entries_recorded: 18

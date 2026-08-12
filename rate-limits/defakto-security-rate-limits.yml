@@ -1,0 +1,47 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/llms.txt
+note: >-
+  No rate limits, quotas, throttling behaviour or retry guidance are published anywhere.
+  The documentation site's own llms.txt indexes every page on d.defakto.security and none of
+  them concerns limits, quotas or throttling. The only structural limit found anywhere in the
+  contract is a pagination bound, which is a page-size cap rather than a rate limit, and it is
+  recorded separately below so it is not miscounted as one.
+  Because the transport is gRPC there are no HTTP response headers to observe either: a
+  throttled call would surface as the gRPC status RESOURCE_EXHAUSTED, which the first-party Go
+  SDK enumerates but leaves unmapped, so a client cannot even distinguish it from any other
+  failure without reaching past the SDK to the raw status. An agent calling this API has no
+  runtime signal for backpressure at all.
+limit_count: 0
+limits: []
+headers: []
+header_style: null
+exhaustion:
+  http_status: null
+  grpc_code: RESOURCE_EXHAUSTED
+  documented: false
+  sdk_typed: false
+  note: >-
+    RESOURCE_EXHAUSTED appears as an unmapped case in
+    spirl-sdk-go/spirlsdk/internal/xerrors/convert.go — the branch exists and does nothing.
+retry_guidance:
+  documented: false
+  backoff: null
+structural_limits:
+- name: page_size
+  kind: pagination-bound
+  value: 1-1000
+  scope: per-request
+  applies_to:
+  - ListTrustDomainWorkloadsRequest
+  source: grpc/defakto-security-workloadsapi.proto
+  note: Not a rate limit. Recorded so a later round does not read it as one.
+evidence:
+- url: https://d.defakto.security/llms.txt
+  status: 200
+  note: Full documentation index; no rate-limit, quota or throttling page exists.
+- url: https://api.defakto.security/
+  status: 415
+  note: >-
+    gRPC-only listener. No unauthenticated HTTP response can be observed, so no live header
+    probe for RateLimit-*/Retry-After is possible on this host.

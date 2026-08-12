@@ -1,0 +1,381 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/trustdomainapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.trustdomain;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message CreateTrustDomainRequest {
+  // Required. The name of the trust domain.
+  string name = 1;
+  // Optional. A description of the trust domain.
+  string description = 2;
+  // Optional. The JWT issuer configuration. When not set, the builtin JWT issuer is used.
+  JwtIssuerConfig jwt_issuer = 3;
+}
+
+message CreateTrustDomainResponse {
+  // Typically ${trust_domain}.${org_name}.spirl.app, but may vary by environment
+  string endpoint_url = 1;
+  string trust_domain_id = 2;
+}
+
+message RegisterTrustDomainRequest {
+  // Required. The name of the trust domain.
+  string name = 1;
+  // Optional. A description of the trust domain.
+  string description = 3;
+  // Optional. The JWT issuer configuration. When not set, the builtin JWT issuer is used.
+  JwtIssuerConfig jwt_issuer = 4;
+}
+
+message RegisterTrustDomainResponse {
+  string trust_domain_id = 1;
+}
+
+message ListTrustDomainsRequest {
+  // Optional. The name of the trust domain to list.
+  string trust_domain_name = 1;
+  // If set to true, will call tdservers to fetch dynamic td status (cluster and federation link
+  // counts).
+  bool include_dynamic_data = 2;
+  // If set to true, will only return trust domains. it will not include clusters, federation
+  // links, or dynamic data.
+  bool exclude_stats = 3;
+}
+
+message ListTrustDomainsResponse {
+  repeated TrustDomain trust_domains = 1;
+}
+
+message DeleteTrustDomainRequest {
+  string trust_domain_id = 2;
+}
+
+message DeleteTrustDomainResponse {
+}
+
+message TrustDomainInfoRequest {
+  string trust_domain_id = 2;
+}
+
+message TrustDomainInfoResponse {
+  string name = 1;
+  string state = 2;
+  string spirl_agent_endpoint_url = 3;
+  string jwt_issuer_endpoint_url = 4;
+  string spiffe_bundle_endpoint_url = 5;
+  string jwks_endpoint_url = 6;
+  string oidc_discovery_endpoint_url = 7;
+  string id = 8;
+  bool is_self_managed = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  string description = 12;
+  JwtIssuerStatus jwt_issuer_status = 13;
+}
+
+message SigningAuthorityStatus {
+  // The ID of the trust domain deployment this status belongs to.
+  string trust_domain_deployment_id = 1;
+  // The name of the trust domain deployment this status belongs to.
+  string trust_domain_deployment_name = 2;
+  // Key rotation schedule. Populated when the signer manages its own key ring (not delegated to
+  // an external authority).
+  BundleRotationSchedule rotation_schedule = 3;
+  // Active signing keys in the trust bundle.
+  repeated SigningKey signing_keys = 4;
+}
+
+message BundleRotationSchedule {
+  // When the current active signing key set was first created. This approximates the time of the
+  // most recent rotation.
+  google.protobuf.Timestamp last_rotated_at = 1;
+  // How far before active key set expiry a new key set is prepared.
+  google.protobuf.Duration preparation_threshold = 2;
+  // Minimum age a prepared key set must reach before it can replace the active key set.
+  google.protobuf.Duration activation_threshold = 3;
+}
+
+message SigningKey {
+  // The type of signing key.
+  SigningKey_KeyType key_type = 1;
+  // Key identifier.
+  string key_id = 2;
+  // When the key was issued.
+  google.protobuf.Timestamp issued_at = 3;
+  // When the key expires.
+  google.protobuf.Timestamp expires_at = 4;
+  // The state of this signing key.
+  SigningKey_State state = 5;
+}
+
+message UpdateTrustDomainRequest {
+  // Required. The ID of the trust domain to update.
+  string trust_domain_id = 1;
+  // Optional. The JWT issuer configuration. When set, configures how JWT-SVID issuer claims are
+  // generated.
+  JwtIssuerConfig jwt_issuer = 2;
+}
+
+message UpdateTrustDomainResponse {
+}
+
+message JwtIssuerConfig {
+  // Whether the issuer is explicitly set. If false or unset, uses the builtin JWT issuer
+  // (computed from the federation endpoint).
+  bool set = 1;
+  // The JWT issuer URL. Semantics depend on 'set': - If set=false: ignored (uses builtin issuer)
+  // - If set=true and issuer="": disables JWT issuer - If set=true and issuer="https://...":
+  // uses custom issuer URL
+  string issuer = 2;
+}
+
+message JwtIssuerStatus {
+  // The current configuration mode.
+  JwtIssuerStatus_Mode mode = 1;
+  // The effective JWT issuer URL being used. Populated when mode is MODE_BUILTIN or MODE_CUSTOM,
+  // empty when MODE_DISABLED.
+  string effective_issuer = 2;
+}
+
+message TrustDomain {
+  string name = 1;
+  string state = 2;
+  string endpoint_url = 3;
+  string id = 4;
+  bool is_self_managed = 5;
+  string jwt_issuer_endpoint_url = 6;
+  string spiffe_bundle_endpoint_url = 7;
+  string jwks_endpoint_url = 8;
+  string oidc_discovery_endpoint_url = 9;
+  // Dynamic trust-domain status (populated when ListTrustDomains sets include_dynamic_data).
+  int64 clusters_total = 10;
+  int64 clusters_active = 11;
+  int64 federation_links_total = 12;
+  int64 federation_links_active = 13;
+  string description = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+  int64 workloads_active = 17;
+  int64 workloads_total = 18;
+  int64 credentials_active = 19;
+  int64 credentials_total = 20;
+  // The maximum time remaining time in seconds for any credential issued by this trust domain.
+  google.protobuf.Duration last_expiry_in = 21;
+  JwtIssuerStatus jwt_issuer_status = 22;
+  int64 agents_active = 23;
+  // Deprecated: Marked as deprecated in api/v1/trustdomainapi/api.proto.
+  int64 clusters_inconclusive = 24;
+  int64 servers_active = 25;
+}
+
+message TrustDomainKey {
+  string id = 1;
+  string trust_domain_id = 2;
+  string state = 3;
+  string deployment_name = 5;
+}
+
+message ListTrustDomainDeploymentsRequest {
+  // Optional. Filters deployment by trust domain id.
+  string trust_domain_id = 1;
+  // Optional. If set to true, includes dynamic/live data from events (agent/server counts, etc).
+  // If false or unset, only data from the control-plane database is returned.
+  bool include_dynamic_data = 2;
+}
+
+message TrustDomainDeployment {
+  string id = 1;
+  string trust_domain_id = 2;
+  string org_id = 3;
+  string deployment_name = 4;
+  google.protobuf.Timestamp last_at_intent = 5;
+  TrustDomainDeployment_ConfigurationState configuration_state = 6;
+  // The number of active agents in the deployment.
+  int64 agents_active = 7;
+  // The number of active servers in the deployment.
+  int64 servers_active = 8;
+}
+
+message ListTrustDomainDeploymentsResponse {
+  repeated TrustDomainDeployment trust_domain_deployments = 1;
+}
+
+message DeleteTrustDomainDeploymentRequest {
+  // Required. The name of the deployment.
+  string deployment_name = 1;
+  // Required. The id of the trust domain
+  string trust_domain_id = 2;
+  // Optional. If force is set the deployment is deleted regardless of any active keys.
+  bool force = 3;
+}
+
+message DeleteTrustDomainDeploymentResponse {
+}
+
+message ListTrustDomainKeysRequest {
+  // Optional. Filter keys by trust domain id.
+  string trust_domain_id = 1;
+  // Optional. Filter keys by deployment name.
+  string deployment_name = 2;
+}
+
+message ListTrustDomainKeysResponse {
+  repeated TrustDomainKey trust_domain_keys = 1;
+}
+
+message CreateTrustDomainKeyRequest {
+  string trust_domain_id = 1;
+  // Required. The deployment_name of the key. It's OK for two keys to have the same name.  That
+  // usually means a rotation happened for that key.
+  string deployment_name = 2;
+}
+
+message CreateTrustDomainKeyResponse {
+  string id = 1;
+}
+
+message DeleteTrustDomainKeyRequest {
+  // Required. The id of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The id of the key to delete.
+  string trust_domain_key_id = 2;
+  // Optional. If force is set the key is deleted regardless of its state.
+  bool force = 3;
+}
+
+message DeleteTrustDomainKeyResponse {
+}
+
+message EnableTrustDomainKeyRequest {
+  // Required. The id of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The id of the key to enable.
+  string trust_domain_key_id = 2;
+}
+
+message EnableTrustDomainKeyResponse {
+}
+
+message DisableTrustDomainKeyRequest {
+  // Required. The id of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The id of the key to disable.
+  string trust_domain_key_id = 2;
+}
+
+message DisableTrustDomainKeyResponse {
+}
+
+message TrustDomainSigningAuthorityStatusRequest {
+  // Required. The ID of the trust domain.
+  string trust_domain_id = 1;
+}
+
+message TrustDomainSigningAuthorityStatusResponse {
+  // Signing authority status for each deployment of this trust domain. Each deployment maintains
+  // its own cluster-local key ring state. Entries are omitted for deployments that are
+  // unreachable.
+  repeated SigningAuthorityStatus signing_authority_statuses = 1;
+}
+
+message PKIXPublicKey {
+  bytes data = 1;
+}
+
+message PrepareDeploymentKeySetRequest {
+  // Required. The ID of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The ID of the trust domain deployment.
+  string trust_domain_deployment_id = 2;
+}
+
+message PrepareDeploymentKeySetResponse {
+  // The ID of the newly prepared key set.
+  string key_set_id = 1;
+  // Signing keys in the deployment's key ring after the operation. May be empty if the operation
+  // succeeded but the signing key status could not be retrieved.
+  repeated SigningKey signing_keys = 2;
+}
+
+message ActivateDeploymentKeySetRequest {
+  // Required. The ID of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The ID of the trust domain deployment.
+  string trust_domain_deployment_id = 2;
+  // Required. The ID of the key set to activate.
+  string key_set_id = 3;
+}
+
+message ActivateDeploymentKeySetResponse {
+  // Signing keys in the deployment's key ring after the operation. May be empty if the operation
+  // succeeded but the signing key status could not be retrieved.
+  repeated SigningKey signing_keys = 1;
+}
+
+message TaintDeploymentKeySetRequest {
+  // Required. The ID of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The ID of the trust domain deployment.
+  string trust_domain_deployment_id = 2;
+  // Required. The ID of the key set to taint.
+  string key_set_id = 3;
+}
+
+message TaintDeploymentKeySetResponse {
+  // Signing keys in the deployment's key ring after the operation. May be empty if the operation
+  // succeeded but the signing key status could not be retrieved.
+  repeated SigningKey signing_keys = 1;
+}
+
+message RemoveDeploymentKeySetRequest {
+  // Required. The ID of the trust domain.
+  string trust_domain_id = 1;
+  // Required. The ID of the trust domain deployment.
+  string trust_domain_deployment_id = 2;
+  // Required. The ID of the key set to remove.
+  string key_set_id = 3;
+}
+
+message RemoveDeploymentKeySetResponse {
+  // Signing keys in the deployment's key ring after the operation. May be empty if the operation
+  // succeeded but the signing key status could not be retrieved.
+  repeated SigningKey signing_keys = 1;
+}
+
+service API {
+  rpc CreateTrustDomain(CreateTrustDomainRequest) returns (CreateTrustDomainResponse);
+  rpc RegisterTrustDomain(RegisterTrustDomainRequest) returns (RegisterTrustDomainResponse);
+  rpc ListTrustDomains(ListTrustDomainsRequest) returns (ListTrustDomainsResponse);
+  rpc DeleteTrustDomain(DeleteTrustDomainRequest) returns (DeleteTrustDomainResponse);
+  rpc TrustDomainInfo(TrustDomainInfoRequest) returns (TrustDomainInfoResponse);
+  rpc UpdateTrustDomain(UpdateTrustDomainRequest) returns (UpdateTrustDomainResponse);
+  rpc ListTrustDomainDeployments(ListTrustDomainDeploymentsRequest) returns (ListTrustDomainDeploymentsResponse);
+  rpc DeleteTrustDomainDeployment(DeleteTrustDomainDeploymentRequest) returns (DeleteTrustDomainDeploymentResponse);
+  rpc ListTrustDomainKeys(ListTrustDomainKeysRequest) returns (ListTrustDomainKeysResponse);
+  rpc CreateTrustDomainKey(CreateTrustDomainKeyRequest) returns (CreateTrustDomainKeyResponse);
+  rpc DeleteTrustDomainKey(DeleteTrustDomainKeyRequest) returns (DeleteTrustDomainKeyResponse);
+  rpc EnableTrustDomainKey(EnableTrustDomainKeyRequest) returns (EnableTrustDomainKeyResponse);
+  rpc DisableTrustDomainKey(DisableTrustDomainKeyRequest) returns (DisableTrustDomainKeyResponse);
+  rpc TrustDomainSigningAuthorityStatus(TrustDomainSigningAuthorityStatusRequest) returns (TrustDomainSigningAuthorityStatusResponse);
+  rpc PrepareDeploymentKeySet(PrepareDeploymentKeySetRequest) returns (PrepareDeploymentKeySetResponse);
+  rpc ActivateDeploymentKeySet(ActivateDeploymentKeySetRequest) returns (ActivateDeploymentKeySetResponse);
+  rpc TaintDeploymentKeySet(TaintDeploymentKeySetRequest) returns (TaintDeploymentKeySetResponse);
+  rpc RemoveDeploymentKeySet(RemoveDeploymentKeySetRequest) returns (RemoveDeploymentKeySetResponse);
+}

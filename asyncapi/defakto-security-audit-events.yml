@@ -1,0 +1,122 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/mint/configuration/telemetry/spirl-telemetry-audit-logging.md
+kind: event-catalog
+spec: null
+note: >-
+  Defakto has a real, well-specified event surface, and it is deliberately NOT an API surface.
+  The Trust Domain Server emits OCSF 1.8.0 events as NDJSON on stdout and explicitly does not
+  ship them anywhere itself — routing to a SIEM is the operator's job. There are no webhooks,
+  no subscriptions, no callback registration and no streaming endpoint, so there is nothing an
+  external consumer can subscribe to over HTTP.
+  For that reason this file carries NO AsyncAPI document and NO `AsyncAPI` or `Webhooks`
+  pointer in apis.yml. Writing an AsyncAPI here would fabricate a subscribable channel that
+  does not exist; claiming Webhooks would assert a callback surface the provider does not
+  serve. The catalog is recorded because the events are real and precisely documented — just
+  not as an API.
+delivery:
+  transport: stdout
+  format: NDJSON (one newline-terminated JSON object per line)
+  shipping: none — operator routes to their own destination
+  webhooks: false
+  subscriptions: false
+  streaming_endpoint: false
+  enabled_by_default: false
+  opt_in: true
+  config:
+    helm_key: ocsf.enabled
+    flag: --ocsf-enable
+    type: bool
+    default: false
+  optional_context:
+  - {key: ocsf.cloudProvider, flag: --ocsf-cloud-provider}
+  - {key: ocsf.cloudRegion, flag: --ocsf-cloud-region}
+  - {key: ocsf.cloudAccount, flag: --ocsf-cloud-account}
+standard:
+  name: Open Cybersecurity Schema Framework
+  version: 1.8.0
+  url: https://schema.ocsf.io/
+  purity: >-
+    Defakto states the events are plain OCSF with no proprietary or non-standard fields added,
+    so they pass strict OCSF validation as-is.
+event_classes:
+- name: Authentication
+  class_uid: 3002
+  category_uid: 3
+  category: Identity & Access Management
+  type_uid: 300201
+  activity: Logon
+  activity_id: 1
+  emitted_on: Each X.509-SVID / JWT-SVID mint attempt, on both success and failure.
+  represents: The credential issued to a workload.
+  fields:
+  - {name: auth_protocol, description: '"SPIFFE X.509-SVID" or "SPIFFE JWT-SVID"'}
+  - {name: auth_protocol_id, description: 'Other (99) — SPIFFE has no dedicated OCSF auth_protocol_id'}
+  - {name: user, description: The subject the credential was issued to — the workload, by SPIFFE ID}
+  - {name: service, description: The trust domain that performed the authentication}
+  - {name: actor, description: 'The calling agent; actor.user.uid / actor.user.name hold the agent ID. Omitted when no authenticated agent is known.'}
+  - {name: api, description: 'api.operation is the gRPC full-method name'}
+  - {name: src_endpoint, description: Caller IP. Omitted when no peer address is known.}
+  unresolved_subject_handling: >-
+    When issuance fails before the workload identity resolves (missing argument, attributes
+    matching no registered identity) the event is still emitted, attributed to the canonical
+    Unknown subject (user.name "unknown", user.type "Unknown"). Failures after resolution
+    carry the resolved user. Nothing is silently dropped.
+- name: Entity Management
+  class_uid: 3004
+  emitted_on: Each signing-key lifecycle operation.
+  represents: A change to a signing key set.
+  activity_mapping:
+  - {operation: Prepared, ocsf_activity: Create, activity_id: 1}
+  - {operation: Activated, ocsf_activity: Activate, activity_id: 10}
+  - {operation: Tainted, ocsf_activity: Update, activity_id: 3}
+  - {operation: Untainted, ocsf_activity: Update, activity_id: 3}
+  - {operation: Removed, ocsf_activity: Delete, activity_id: 4}
+  modelling_note: >-
+    Taint and untaint are modelled as Update rather than Deactivate, because a tainted key set
+    stays published — its IDs are still distributed so workloads distrust and rotate away — and
+    is therefore never taken out of service. The message field disambiguates taint from untaint.
+common_fields:
+- {name: time, description: Event time as epoch milliseconds}
+- {name: metadata.version, description: OCSF schema version ("1.8.0")}
+- {name: metadata.product, description: 'vendor_name "Defakto", name "spirl-server", plus version'}
+- {name: metadata.tags, description: Origin tags identifying the event source}
+- {name: cloud, description: Cloud environment from the cloud configuration}
+- {name: osint, description: Required by the schema; always emitted as an empty array}
+- {name: severity_id, description: '1 (Informational) on success, 3 (Medium) on failure'}
+- {name: status_id, description: '1 (Success) or 2 (Failure)'}
+- {name: message, description: Human-readable summary of the outcome}
+- {name: status_code, description: 'On failure the gRPC status code; on an idempotent success that changed nothing, "Unchanged". Omitted otherwise.'}
+- {name: status_detail, description: Sanitized free-text failure reason. Present on failure only.}
+origin_tags:
+- {name: trust_domain_id, scope: all events}
+- {name: trust_domain_deployment_id, scope: all events}
+- {name: cluster_id, scope: Authentication events}
+- {name: cluster_version_id, scope: Authentication events}
+- {name: realm, scope: Authentication events}
+related_telemetry:
+  metrics:
+    agent: https://d.defakto.security/mint/operations/agent-metrics.md
+    server: https://d.defakto.security/mint/operations/server-metrics.md
+    format: Prometheus
+  dashboards:
+    url: https://d.defakto.security/mint/operations/spirl-telemetry-dashboards.md
+    templates: https://github.com/spirl/dashboard-templates
+  log_grouping:
+    url: https://d.defakto.security/mint/operations/spirl-telemetry-log-grouping.md
+    detail: Request-related logs are grouped by spanid and traceid.
+  in_api:
+    note: >-
+      The same underlying events are readable through the Management API rather than the log
+      stream — statisticsapi exposes SVIDIssuedEvent, HealthEvent and ActivityFeedEntry with
+      filters. That is a pull surface on the gRPC API, not a push surface.
+    protos:
+    - grpc/defakto-security-statisticsapi.proto
+    - grpc/defakto-security-alertapi.proto
+alerting:
+  service: alertapi
+  entities: [AlertConfig, EmailConfig, Alert]
+  channel: email
+  note: >-
+    The only outbound notification channel expressed in the contract is email (EmailConfig on
+    AlertConfig). No HTTP callback / webhook destination type exists in the alert contract.

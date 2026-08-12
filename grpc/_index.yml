@@ -1,0 +1,278 @@
+generated: '2026-08-12'
+method: derived
+source: https://github.com/spirl/spirl-sdk-go
+note: 'Index of the Defakto Management API gRPC surface, reconstructed from the protoc-gen-go bindings
+  published in the first-party Go SDK. This is the machine-readable contract for this provider: there
+  is no OpenAPI, no GraphQL and no published .proto, and api.defakto.security answers 415 application/grpc
+  to every non-gRPC request including /openapi.json. Each entry names the real proto source path recorded
+  in the generated file header, so a reader can verify any line against the SDK. See the header of each
+  .proto for the known lossiness of the reconstruction (oneof groups, field options).'
+transport:
+  protocol: gRPC over HTTP/2
+  tls: true
+  port: 443
+  hosts:
+  - https://api.defakto.security
+  - https://api.spirl.com
+  reflection: not probed anonymously; the endpoint rejects non-gRPC content types
+totals:
+  services: 15
+  proto_files: 16
+  rpcs: 126
+  messages: 390
+  enums: 32
+services:
+- file: defakto-security-accessapi.proto
+  package: com.spirl.api.v1.access
+  service: com.spirl.api.v1.access.API
+  proto_source: api/v1/accessapi/api.proto
+  rpcs: 23
+  messages: 59
+  enums: 1
+  methods:
+  - ListOrgRoles
+  - ListRoles
+  - ListUsers
+  - UpdateUserRole
+  - DeleteUser
+  - CreateUserInvitation
+  - RenewUserInvitation
+  - DeleteUserInvitation
+  - ListUserInvitations
+  - CreateServiceAccount
+  - ListServiceAccounts
+  - GetServiceAccountInfo
+  - UpdateServiceAccountRole
+  - DeleteServiceAccount
+  - CreateServiceAccountKey
+  - DeleteServiceAccountKey
+  - UpdateServiceAccountKeyStatus
+  - UpdateOrgSettings
+  - GetOrgSettings
+  - AssignRoleAssignment
+  - RemoveRoleAssignment
+  - ListRoleAssignments
+  - ListDelegatedAdmins
+- file: defakto-security-trustdomainapi.proto
+  package: com.spirl.api.v1.trustdomain
+  service: com.spirl.api.v1.trustdomain.API
+  proto_source: api/v1/trustdomainapi/api.proto
+  rpcs: 18
+  messages: 45
+  enums: 0
+  methods:
+  - CreateTrustDomain
+  - RegisterTrustDomain
+  - ListTrustDomains
+  - DeleteTrustDomain
+  - TrustDomainInfo
+  - UpdateTrustDomain
+  - ListTrustDomainDeployments
+  - DeleteTrustDomainDeployment
+  - ListTrustDomainKeys
+  - CreateTrustDomainKey
+  - DeleteTrustDomainKey
+  - EnableTrustDomainKey
+  - DisableTrustDomainKey
+  - TrustDomainSigningAuthorityStatus
+  - PrepareDeploymentKeySet
+  - ActivateDeploymentKeySet
+  - TaintDeploymentKeySet
+  - RemoveDeploymentKeySet
+- file: defakto-security-clusterapi.proto
+  package: com.spirl.api.v1.cluster
+  service: com.spirl.api.v1.cluster.API
+  proto_source: api/v1/clusterapi/api.proto
+  rpcs: 12
+  messages: 34
+  enums: 3
+  methods:
+  - CreateCluster
+  - ListClusters
+  - ListClustersV2
+  - DescribeClusters
+  - DeleteCluster
+  - NewClusterVersion
+  - ActivateClusterVersion
+  - DeactivateClusterVersion
+  - DeleteClusterVersion
+  - ListClusterVersions
+  - ListWorkloads
+  - ListNodes
+- file: defakto-security-configapi.proto
+  package: com.spirl.api.v1.config
+  service: com.spirl.api.v1.config.API
+  proto_source: api/v1/configapi/api.proto
+  rpcs: 11
+  messages: 37
+  enums: 1
+  methods:
+  - GetOrgConfig
+  - UpdateOrgConfig
+  - GetTrustDomainConfig
+  - UpdateTrustDomainConfig
+  - GetClusterConfig
+  - UpdateClusterConfig
+  - GetTrustDomainDeploymentConfig
+  - UpdateTrustDomainDeploymentConfig
+  - GetConfigHistory
+  - GetConfigVersion
+  - DiffConfigVersions
+- file: defakto-security-devidentityapi.proto
+  package: com.spirl.api.v1.devidentity
+  service: com.spirl.api.v1.devidentity.API
+  proto_source: api/v1/devidentityapi/api.proto
+  rpcs: 11
+  messages: 28
+  enums: 2
+  methods:
+  - AddDevIdentityPolicy
+  - UpdateDevIdentityPolicy
+  - ListDevIdentityPolicies
+  - DeleteDevIdentityPolicy
+  - AddDevIdentityOIDCConfig
+  - UpdateDevIdentityOIDCConfig
+  - ListDevIdentityOIDCConfigs
+  - DeleteDevIdentityOIDCConfig
+  - EnablePolicy
+  - DisablePolicy
+  - UnifiedAccessStatus
+- file: defakto-security-alertapi.proto
+  package: com.spirl.api.v1.alert
+  service: com.spirl.api.v1.alert.API
+  proto_source: api/v1/alertapi/api.proto
+  rpcs: 8
+  messages: 19
+  enums: 1
+  methods:
+  - GetAlertConfig
+  - ListAlertConfigs
+  - CreateAlertConfig
+  - DeleteAlertConfig
+  - SendVerificationEmail
+  - VerifyEmail
+  - ListAlerts
+  - CreateTestAlert
+- file: defakto-security-statisticsapi.proto
+  package: com.spirl.api.v1.statistics
+  service: com.spirl.api.v1.statistics.API
+  proto_source: api/v1/statisticsapi/api.proto
+  rpcs: 8
+  messages: 39
+  enums: 10
+  methods:
+  - Query
+  - Count
+  - HealthEvents
+  - SVIDIssuedEvents
+  - ListAgents
+  - DescribeAgents
+  - ListServers
+  - ListActivityFeed
+- file: defakto-security-sessionapi.proto
+  package: com.spirl.api.v1.session
+  service: com.spirl.api.v1.session.API
+  proto_source: api/v1/sessionapi/api.proto
+  rpcs: 7
+  messages: 30
+  enums: 0
+  methods:
+  - StartLogin
+  - FinishLogin
+  - Whoami
+  - ListOrgs
+  - Logout
+  - Login
+  - AuthenticateServiceAccount
+- file: defakto-security-cicdapi.proto
+  package: com.spirl.api.v1.cicd
+  service: com.spirl.api.v1.cicd.API
+  proto_source: api/v1/cicdapi/api.proto
+  rpcs: 6
+  messages: 14
+  enums: 1
+  methods:
+  - CreateCICDProfile
+  - ListCICDProfiles
+  - DeleteCICDProfile
+  - LinkCICDProfile
+  - UnlinkCICDProfile
+  - ListCICDProfileLinks
+- file: defakto-security-scannerapi.proto
+  package: com.spirl.api.v1.scanner
+  service: com.spirl.api.v1.scanner.API
+  proto_source: api/v1/scannerapi/api.proto
+  rpcs: 6
+  messages: 33
+  enums: 9
+  methods:
+  - CreateScanner
+  - UpdateScanner
+  - DeleteScanner
+  - ListScanners
+  - GetScanner
+  - ListScannerTargets
+- file: defakto-security-agentattestationapi.proto
+  package: com.spirl.api.v1.agentattestation
+  service: com.spirl.api.v1.agentattestation.API
+  proto_source: api/v1/agentattestationapi/api.proto
+  rpcs: 4
+  messages: 10
+  enums: 0
+  methods:
+  - CreateConfig
+  - ListConfigs
+  - GetConfig
+  - DeleteConfig
+- file: defakto-security-federationapi.proto
+  package: com.spirl.api.v1.federation
+  service: com.spirl.api.v1.federation.API
+  proto_source: api/v1/federationapi/api.proto
+  rpcs: 4
+  messages: 13
+  enums: 0
+  methods:
+  - SetLink
+  - DeleteLink
+  - ListLinks
+  - RefreshLink
+- file: defakto-security-providerattestationapi.proto
+  package: com.spirl.api.v1.providerattestation
+  service: com.spirl.api.v1.providerattestation.API
+  proto_source: api/v1/providerattestationapi/api.proto
+  rpcs: 4
+  messages: 11
+  enums: 0
+  methods:
+  - CreateConfig
+  - ListConfigs
+  - GetConfig
+  - DeleteConfig
+- file: defakto-security-realmapi.proto
+  package: com.spirl.api.v1.realm
+  service: com.spirl.api.v1.realm.API
+  proto_source: api/v1/realmapi/api.proto
+  rpcs: 3
+  messages: 8
+  enums: 0
+  methods:
+  - CreateRealm
+  - ListRealms
+  - DeleteRealm
+- file: defakto-security-workloadsapi.proto
+  package: com.spirl.api.v1.workloads
+  service: com.spirl.api.v1.workloads.API
+  proto_source: api/v1/workloadsapi/api.proto
+  rpcs: 1
+  messages: 8
+  enums: 2
+  methods:
+  - ListTrustDomainWorkloads
+- file: defakto-security-listing.proto
+  package: com.spirl.api.v1.listing
+  service: null
+  proto_source: api/v1/listing/api.proto
+  rpcs: 0
+  messages: 2
+  enums: 2
+  methods: []

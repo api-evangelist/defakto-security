@@ -1,0 +1,292 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/configapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.config;
+
+import "google/protobuf/timestamp.proto";
+
+enum SectionDiffType {
+  SECTION_DIFF_TYPE_UNSPECIFIED = 0;
+  SECTION_DIFF_TYPE_ADDED = 1;
+  SECTION_DIFF_TYPE_REMOVED = 2;
+  SECTION_DIFF_TYPE_CHANGED = 3;
+  SECTION_DIFF_TYPE_UNCHANGED = 4;
+}
+
+message GetOrgConfigRequest {
+}
+
+message GetOrgConfigResponse {
+  // The organization configuration.
+  Config config = 1;
+}
+
+message UpdateOrgConfigRequest {
+  // The parameters for the update operation.
+  UpdateConfigParams params = 1;
+}
+
+message UpdateOrgConfigResponse {
+  // The updated organization configuration.
+  Config config = 1;
+}
+
+message GetTrustDomainConfigRequest {
+  // The ID of the trust domain whose configuration to get.
+  string trust_domain_id = 1;
+}
+
+message GetTrustDomainConfigResponse {
+  // The trust domain configuration.
+  Config config = 1;
+}
+
+message UpdateTrustDomainConfigRequest {
+  // The ID of the trust domain whose configuration to set.
+  string trust_domain_id = 1;
+  // The parameters for the update operation.
+  UpdateConfigParams params = 2;
+}
+
+message UpdateTrustDomainConfigResponse {
+  // The updated trust domain configuration.
+  Config config = 1;
+}
+
+message GetClusterConfigRequest {
+  // The ID of the cluster whose configuration to get.
+  string cluster_id = 1;
+}
+
+message GetClusterConfigResponse {
+  // The cluster configuration.
+  Config config = 1;
+}
+
+message UpdateClusterConfigRequest {
+  // The ID of the cluster whose configuration to set.
+  string cluster_id = 1;
+  // The parameters for the update operation.
+  UpdateConfigParams params = 2;
+}
+
+message UpdateClusterConfigResponse {
+  // The updated cluster configuration.
+  Config config = 1;
+}
+
+message GetTrustDomainDeploymentConfigRequest {
+  // The ID of the trust domain deployment whose configuration to get.
+  string trust_domain_deployment_id = 1;
+}
+
+message GetTrustDomainDeploymentConfigResponse {
+  // The trust domain deployment configuration.
+  Config config = 1;
+}
+
+message UpdateTrustDomainDeploymentConfigRequest {
+  // The ID of the trust domain deployment whose configuration to set.
+  string trust_domain_deployment_id = 1;
+  // The parameters for the update operation.
+  UpdateConfigParams params = 2;
+}
+
+message UpdateTrustDomainDeploymentConfigResponse {
+  // The updated trust domain deployment configuration.
+  Config config = 1;
+}
+
+message UpdateConfigParams {
+  // Self-describing YAML for the configuration sections to update.
+  repeated string section_updates = 1;
+  // If true, deletes sections from the configuration that are not present in section_updates.
+  bool prune = 2;
+  // If set, only updates the configuration if it is currently at the provided version. This
+  // facilitates opportunisic concurrency, preventing a caller from unexpectedly overwriting
+  // another change.
+  string expected_version = 3;
+  // If true, validates the configuration without persisting any changes. The response will
+  // contain the sections that would result from the update, but the version and updated_at will
+  // reflect the current (unchanged) state. If expected_version is also set, the version check is
+  // still applied — the call will fail with FAILED_PRECONDITION if the current version does not
+  // match.
+  bool validate_only = 4;
+}
+
+message Config {
+  // When the configuration was last updated. Will not be set if the configuration has never been
+  // set.
+  google.protobuf.Timestamp updated_at = 1;
+  // The configuration version. This is an opaque value updated whenever the configuration is
+  // changed. It can be supplied in an update call to prevent overwriting changes made by another
+  // caller (see UpdateConfigParams).
+  string version = 2;
+  // The configuration sections.
+  repeated Section sections = 3;
+}
+
+message Section {
+  // The section name, e.g. "AttributeRedaction"
+  string name = 1;
+  // The section schema version, e.g. "v1".
+  string schema = 2;
+  // The section YAML value. This value is wholly self-describing, including the section name and
+  // schema version, for example:  section: AttributeRedaction schema: v1 spec:  policy:
+  // allowList: filters: ["a", "b"]
+  string yaml_value = 3;
+  // Whether the section is read-only for the caller.
+  bool read_only = 4;
+}
+
+message SchemaValidationError {
+  // Section validation errors after applying the patches.
+  repeated SectionValidationError section_validation_errors = 1;
+}
+
+message SectionValidationError {
+  // The name of the section that failed validation, e.g. "AttributeRedaction".
+  string name = 1;
+  // The schema of the the section that failed validation, e.g. "v1".
+  string schema = 2;
+  // Specification validation errors.
+  repeated SpecValidationError spec_validation_errors = 3;
+}
+
+message SpecValidationError {
+  // The path of the property in the section specification, in JSONPointer syntax, e.g.
+  // "/policy/allowList/filters[0]".
+  string path = 1;
+  // The reason for the validation failure.
+  string reason = 2;
+}
+
+message ConfigScope {
+}
+
+message OrgConfigRef {
+}
+
+message TrustDomainConfigRef {
+  string trust_domain_id = 1;
+}
+
+message TrustDomainDeploymentConfigRef {
+  string trust_domain_deployment_id = 1;
+}
+
+message ClusterConfigRef {
+  string cluster_id = 1;
+}
+
+message GetConfigHistoryRequest {
+  // The configuration scope to get history for.
+  ConfigScope config_scope = 1;
+  // Maximum number of versions to return. Defaults to 20, max 50.
+  int32 page_size = 2;
+  // Pagination token from a previous response.
+  string page_token = 3;
+}
+
+message GetConfigHistoryResponse {
+  // The version history entries, ordered newest first.
+  repeated ConfigVersionSummary versions = 1;
+  // Token for fetching the next page of results.
+  string next_page_token = 2;
+}
+
+message GetConfigVersionRequest {
+  // The configuration scope to get a version for.
+  ConfigScope config_scope = 1;
+  // The version to retrieve.
+  string version = 2;
+}
+
+message GetConfigVersionResponse {
+  // The configuration at this version.
+  Config config = 1;
+  // The actor who made this change.
+  Actor actor = 2;
+}
+
+message DiffConfigVersionsRequest {
+  // The configuration scope to diff.
+  ConfigScope config_scope = 1;
+  // The base version to compare from.
+  string from_version = 2;
+  // The target version to compare to.
+  string to_version = 3;
+}
+
+message DiffConfigVersionsResponse {
+  // The diff between the two versions.
+  ConfigDiff diff = 1;
+}
+
+message ConfigVersionSummary {
+  // The version identifier (KSUID).
+  string version = 1;
+  // When this version was created.
+  google.protobuf.Timestamp created_at = 2;
+  // The actor who created this version.
+  Actor actor = 3;
+}
+
+message Actor {
+  // The type of actor: "user" or "service_account".
+  string type = 1;
+  // The actor's ID.
+  string id = 2;
+  // A human-readable display name (email for users, key ID for service accounts).
+  string display_name = 3;
+}
+
+message ConfigDiff {
+  // The base version.
+  string from_version = 1;
+  // The target version.
+  string to_version = 2;
+  // Per-section diffs.
+  repeated SectionDiff section_diffs = 3;
+}
+
+message SectionDiff {
+  // The section name.
+  string name = 1;
+  // The section schema version.
+  string schema = 2;
+  // The type of change.
+  SectionDiffType type = 3;
+  // The section YAML in the base version. Empty if the section was added.
+  string from_yaml = 4;
+  // The section YAML in the target version. Empty if the section was removed.
+  string to_yaml = 5;
+}
+
+service API {
+  rpc GetOrgConfig(GetOrgConfigRequest) returns (GetOrgConfigResponse);
+  rpc UpdateOrgConfig(UpdateOrgConfigRequest) returns (UpdateOrgConfigResponse);
+  rpc GetTrustDomainConfig(GetTrustDomainConfigRequest) returns (GetTrustDomainConfigResponse);
+  rpc UpdateTrustDomainConfig(UpdateTrustDomainConfigRequest) returns (UpdateTrustDomainConfigResponse);
+  rpc GetClusterConfig(GetClusterConfigRequest) returns (GetClusterConfigResponse);
+  rpc UpdateClusterConfig(UpdateClusterConfigRequest) returns (UpdateClusterConfigResponse);
+  rpc GetTrustDomainDeploymentConfig(GetTrustDomainDeploymentConfigRequest) returns (GetTrustDomainDeploymentConfigResponse);
+  rpc UpdateTrustDomainDeploymentConfig(UpdateTrustDomainDeploymentConfigRequest) returns (UpdateTrustDomainDeploymentConfigResponse);
+  rpc GetConfigHistory(GetConfigHistoryRequest) returns (GetConfigHistoryResponse);
+  rpc GetConfigVersion(GetConfigVersionRequest) returns (GetConfigVersionResponse);
+  rpc DiffConfigVersions(DiffConfigVersionsRequest) returns (DiffConfigVersionsResponse);
+}

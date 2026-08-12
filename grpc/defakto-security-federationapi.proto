@@ -1,0 +1,106 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/federationapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.federation;
+
+import "google/protobuf/timestamp.proto";
+
+message SetLinkRequest {
+  Link link = 2;
+  string trust_domain_id = 3;
+}
+
+message SetLinkResponse {
+  // The unique ID of the federation link
+  string id = 1;
+}
+
+message DeleteLinkRequest {
+  // The foreign trust domain that we are linked to
+  string foreign_trust_domain_name = 2;
+  // The trust domain that has the link
+  string trust_domain_id = 3;
+}
+
+message DeleteLinkResponse {
+}
+
+message ListLinksRequest {
+  // The trust domain to filter on
+  string trust_domain_id = 2;
+}
+
+message ListLinksResponse {
+  repeated LinkStatus link_statuses = 2;
+}
+
+message RefreshLinkRequest {
+  string trust_domain_id = 1;
+  // The foreign trust domain that we are linked to
+  string foreign_trust_domain_name = 2;
+}
+
+message RefreshLinkResponse {
+}
+
+message LinkStatus {
+  // The name of the trust domain with the configured link
+  string trust_domain_name = 1;
+  // The link.
+  Link link = 2;
+  // status of the last poll
+  PollStatus last_poll = 3;
+  // The timestamp of the last time the bundle was updated when polling.
+  google.protobuf.Timestamp last_bundle_update = 4;
+  // The ID of the trust domain with the configured link
+  string trust_domain_id = 5;
+  // The timestamp when the federation link was created.
+  google.protobuf.Timestamp created_at = 6;
+  // The unique ID of the federation link
+  string id = 7;
+  // The timestamp of the last successful poll (i.e. poll that did not return an error).
+  google.protobuf.Timestamp last_successful_poll = 8;
+}
+
+message Link {
+  // The foreign trust domain name
+  string trust_domain_name = 1;
+  Endpoint endpoint = 2;
+}
+
+message Endpoint {
+  string url = 1;
+}
+
+message HTTPSWebProfile {
+}
+
+message PollStatus {
+  // The timestamp of the poll attempt.
+  google.protobuf.Timestamp timestamp = 1;
+  // The error encountered while polling.
+  string error = 2;
+  // Detailed log of the HTTP exchange for the last poll. Intended for debugging use only.
+  string http_log = 3;
+}
+
+service API {
+  rpc SetLink(SetLinkRequest) returns (SetLinkResponse);
+  rpc DeleteLink(DeleteLinkRequest) returns (DeleteLinkResponse);
+  rpc ListLinks(ListLinksRequest) returns (ListLinksResponse);
+  rpc RefreshLink(RefreshLinkRequest) returns (RefreshLinkResponse);
+}

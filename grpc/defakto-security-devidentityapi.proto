@@ -1,0 +1,254 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/devidentityapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.devidentity;
+
+import "google/protobuf/duration.proto";
+
+enum ComparisonOperator {
+  EQUAL = 0;
+  NOT_EQUAL = 1;
+}
+
+enum ClientAuthMethod {
+  CLIENTAUTHMETHOD_NONE = 0;
+  CLIENTAUTHMETHOD_SECRET_BASIC = 1;
+  CLIENTAUTHMETHOD_SECRET_POST = 2;
+  CLIENTAUTHMETHOD_SECRET_JWT = 3;
+  CLIENTAUTHMETHOD_PRIVATEKEY_JWT = 4;
+  CLIENTAUTHMETHOD_SECRET_AUTODETECT = 5;
+}
+
+message DevIDPolicy {
+  // Unique identifier for the DevIdentity policy.
+  string id = 1;
+  // Name of the DevIdentity policy.
+  string name = 2;
+  // DevOIDCConfig ID of the DevIdentity policy.
+  string dev_oidc_config_id = 3;
+  // DevOIDCConfig name of the DevIdentity policy.
+  string dev_oidc_config_name = 4;
+  // Claims required during identity attestation.
+  ClaimsFilter claims_filter = 5;
+  // Path template used to generate SPIFFE ID.
+  string path_template = 6;
+  // SVID TTL of the DevIdentity policy.
+  google.protobuf.Duration svid_ttl = 7;
+}
+
+message AddDevIdentityPolicyRequest {
+  // Required. Name of the DevIdentity policy.
+  string name = 1;
+  // Required. DevOIDCConfig ID used for identity attestation.
+  string dev_oidc_config_id = 2;
+  // Optional. Claims filters applied during identity attestation.
+  ClaimsFilter claims_filter = 3;
+  // Optional. Path template used to generate SPIFFE ID.
+  string path_template = 4;
+  // Optional. Developer SVID TTL.
+  google.protobuf.Duration svid_ttl = 5;
+}
+
+message AddDevIdentityPolicyResponse {
+  // Unique identifier for the created DevIdentity policy.
+  string id = 1;
+}
+
+message UpdateDevIdentityPolicyRequest {
+  // Unique identifier of the DevIdentity policy.
+  string id = 1;
+  // Optional. DevOIDCConfig ID used for identity attestation.
+  string dev_oidc_config_id = 2;
+  // Optional. Claims filters applied during identity attestation.
+  ClaimsFilter claims_filter = 3;
+  // Optional. Path template used to generate SPIFFE ID.
+  string path_template = 4;
+  // Optional. Developer SVID TTL.
+  google.protobuf.Duration svid_ttl = 5;
+}
+
+message UpdateDevIdentityPolicyResponse {
+}
+
+message ListDevIdentityPoliciesRequest {
+  // Optional. Name filter.
+  string name = 2;
+}
+
+message ListDevIdentityPoliciesResponse {
+  repeated DevIDPolicy policies = 1;
+}
+
+message DeleteDevIdentityPolicyRequest {
+  // Required. ID of the DevIdentity policy to delete.
+  string id = 2;
+}
+
+message DeleteDevIdentityPolicyResponse {
+}
+
+message ClaimsFilter {
+  repeated ClaimFilter filters = 1;
+}
+
+message ClaimFilter {
+  // Required. Claim key.
+  string key = 1;
+  // Required. Claim value.
+  string value = 2;
+  // Required. Comparison operator.
+  ComparisonOperator operator = 3;
+}
+
+message DevOIDCConfig {
+  // Unique identifier for the DevOIDCConfig.
+  string id = 1;
+  // Name of the DevOIDCConfig.
+  string name = 2;
+  // Issuer URL if the IDP.
+  string issuer_url = 3;
+  // Client ID for the IDP.
+  string client_id = 4;
+  // OIDC client authentication method.
+  ClientAuthMethod client_auth_method = 5;
+  // Client secret for the IDP.
+  string client_secret = 6;
+  // Client private key ID for the IDP.
+  string client_private_key_id = 7;
+  // Client private key for the IDP.
+  string client_private_key = 8;
+}
+
+message AddDevIdentityOIDCConfigRequest {
+  // Required. Name of the DevOIDCConfig.
+  string name = 1;
+  // Required. Issuer URL of the IDP.
+  string issuer_url = 2;
+  // Required. Client ID for the IDP.
+  string client_id = 3;
+  // Required. OIDC client authentication method.
+  ClientAuthMethod client_auth_method = 4;
+  // Optional. Client secret for the IDP.
+  string client_secret = 5;
+  // Optional. Client private key for the IDP.
+  string client_private_key = 6;
+  // Optional. Client private key ID for the IDP.
+  string client_private_key_id = 7;
+}
+
+message AddDevIdentityOIDCConfigResponse {
+  // Unique identifier for the created DevOIDCConfig.
+  string id = 1;
+}
+
+message UpdateDevIdentityOIDCConfigRequest {
+  // Required. ID of the DevOIDCConfig.
+  string id = 1;
+  // Optional. Issuer URL of the IDP.
+  string issuer_url = 2;
+  // Optional. Client ID for the IDP.
+  string client_id = 3;
+  // Optional. OIDC client authentication method.
+  ClientAuthMethod client_auth_method = 4;
+  // Optional. Client secret for the IDP.
+  string client_secret = 5;
+  // Optional. Client private key for the IDP.
+  string client_private_key = 6;
+  // Optional. Client private key ID for the IDP.
+  string client_private_key_id = 7;
+}
+
+message UpdateDevIdentityOIDCConfigResponse {
+}
+
+message ListDevIdentityOIDCConfigsRequest {
+  // Optional. Name filter.
+  string name = 1;
+}
+
+message ListDevIdentityOIDCConfigsResponse {
+  repeated DevOIDCConfig configs = 1;
+}
+
+message DeleteDevIdentityOIDCConfigRequest {
+  // Required. ID of the DevOIDCConfig to delete.
+  string id = 2;
+}
+
+message DeleteDevIdentityOIDCConfigResponse {
+}
+
+message EnablePolicyRequest {
+  // Required. ID of the DevIdentity policy to enable.
+  string policy_id = 1;
+  // Required. Trust Domain to enable the policy.
+  string trust_domain_id = 2;
+}
+
+message EnablePolicyResponse {
+}
+
+message DisablePolicyRequest {
+  // Required. Trust Domain to disable unified access.
+  string trust_domain_id = 2;
+}
+
+message DisablePolicyResponse {
+  // Disabled DevIdentity policy ID.
+  string policy_name = 1;
+}
+
+message UnifiedAccessStatusRequest {
+  // Optional. Trust Domain ID filter.
+  string trust_domain_id = 1;
+}
+
+message UnifiedAccessStatusResponse {
+  // Status of unified access configurations for every trust domain in the organization.
+  repeated UnifiedAccessStatus unified_access_status = 1;
+}
+
+message UnifiedAccessStatus {
+  // Trust Domain ID.
+  string trust_domain_id = 1;
+  // Trust Domain name.
+  string trust_domain_name = 2;
+  // Whether unified access is enabled or not.
+  bool enabled = 3;
+  // Enabled DevIdentity policy ID.
+  string enabled_policy_id = 4;
+  // DevIdentity policy name.
+  string enabled_policy_name = 5;
+}
+
+message PKIXPublicKey {
+  bytes data = 1;
+}
+
+service API {
+  rpc AddDevIdentityPolicy(AddDevIdentityPolicyRequest) returns (AddDevIdentityPolicyResponse);
+  rpc UpdateDevIdentityPolicy(UpdateDevIdentityPolicyRequest) returns (UpdateDevIdentityPolicyResponse);
+  rpc ListDevIdentityPolicies(ListDevIdentityPoliciesRequest) returns (ListDevIdentityPoliciesResponse);
+  rpc DeleteDevIdentityPolicy(DeleteDevIdentityPolicyRequest) returns (DeleteDevIdentityPolicyResponse);
+  rpc AddDevIdentityOIDCConfig(AddDevIdentityOIDCConfigRequest) returns (AddDevIdentityOIDCConfigResponse);
+  rpc UpdateDevIdentityOIDCConfig(UpdateDevIdentityOIDCConfigRequest) returns (UpdateDevIdentityOIDCConfigResponse);
+  rpc ListDevIdentityOIDCConfigs(ListDevIdentityOIDCConfigsRequest) returns (ListDevIdentityOIDCConfigsResponse);
+  rpc DeleteDevIdentityOIDCConfig(DeleteDevIdentityOIDCConfigRequest) returns (DeleteDevIdentityOIDCConfigResponse);
+  rpc EnablePolicy(EnablePolicyRequest) returns (EnablePolicyResponse);
+  rpc DisablePolicy(DisablePolicyRequest) returns (DisablePolicyResponse);
+  rpc UnifiedAccessStatus(UnifiedAccessStatusRequest) returns (UnifiedAccessStatusResponse);
+}

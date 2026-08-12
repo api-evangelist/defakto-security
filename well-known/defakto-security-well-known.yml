@@ -1,0 +1,122 @@
+generated: '2026-08-12'
+method: probed
+source: live HTTP probes, 2026-08-12
+note: >-
+  Every /.well-known/ path probed on every Defakto host returned a miss. No WellKnown or
+  SecurityTxt pointer is emitted in apis.yml, because this file records an ABSENCE, not a
+  surface the provider serves. Two failure shapes are worth separating:
+  (1) the marketing site and the docs site are ordinary SPAs/WordPress that return an HTML
+  404 body for every unknown path — a real 404, not a soft-200;
+  (2) api.defakto.security and api.spirl.com answer 415 with content-type application/grpc
+  on EVERY path including /.well-known/*. That is not a 404 — it is a pure gRPC listener
+  rejecting a non-gRPC content type, and it means well-known discovery is structurally
+  unavailable on the API hosts rather than merely unimplemented.
+  fed.spirl.org, which the docs describe as serving "SPIFFE Bundle and OIDC metadata",
+  returned 403 with an XML body (an S3-style AccessDenied) at the root and at
+  /.well-known/openid-configuration — the OIDC metadata is served per trust domain under a
+  path this profile cannot enumerate anonymously, not at the host root.
+hosts:
+- host: https://www.defakto.security
+  kind: website
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    content_type: text/html
+  - path: /.well-known/openid-configuration
+    status: 404
+    content_type: text/html
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    content_type: text/html
+  - path: /.well-known/api-catalog
+    status: 404
+    content_type: text/html
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    content_type: text/html
+  - path: /.well-known/agent-card.json
+    status: 404
+    content_type: text/html
+  - path: /.well-known/agent.json
+    status: 404
+    content_type: text/html
+- host: https://d.defakto.security
+  kind: documentation
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    content_type: text/html
+  - path: /.well-known/api-catalog
+    status: 404
+    content_type: text/html
+  - path: /.well-known/agent-card.json
+    status: 404
+    content_type: text/html
+  - path: /.well-known/agent.json
+    status: 404
+    content_type: text/html
+- host: https://api.defakto.security
+  kind: api
+  documents:
+  - path: /
+    status: 415
+    content_type: application/grpc
+    note: gRPC-only listener; rejects any non-gRPC content type
+  - path: /.well-known/agent-card.json
+    status: 415
+    content_type: application/grpc
+  - path: /openapi.json
+    status: 415
+    content_type: application/grpc
+- host: https://api.spirl.com
+  kind: api
+  documents:
+  - path: /
+    status: 415
+    content_type: application/grpc
+  - path: /.well-known/openid-configuration
+    status: 415
+    content_type: application/grpc
+  - path: /.well-known/oauth-authorization-server
+    status: 415
+    content_type: application/grpc
+  - path: /openapi.json
+    status: 415
+    content_type: application/grpc
+- host: https://auth.api.defakto.security
+  kind: auth
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 404
+    content_type: text/plain
+- host: https://auth.api.spirl.com
+  kind: auth
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 404
+    content_type: text/plain
+- host: https://fed.spirl.org
+  kind: federation
+  documents:
+  - path: /
+    status: 403
+    content_type: application/xml
+  - path: /.well-known/openid-configuration
+    status: 403
+    content_type: application/xml
+    note: >-
+      Documented as the host for "SPIFFE Bundle and OIDC metadata"; root-level discovery is
+      denied. Per-trust-domain bundle/JWKS paths exist but are not anonymously enumerable.
+- host: https://console.defakto.security
+  kind: console
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: text/html
+    note: >-
+      REJECTED as a hit. The console is a single-page app whose catch-all returns the same
+      6,958-byte HTML shell for every unknown path. A 200 carrying an HTML document is not a
+      well-known document; recorded here so a later round does not re-credit it.
+summary:
+  documents_found: 0
+  pointer_emitted: false

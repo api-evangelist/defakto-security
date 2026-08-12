@@ -1,0 +1,164 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/releases.md
+note: >-
+  Defakto distributes very little through the mainstream language registries. The one
+  registry-resolvable library is the Go SDK, published through the Go module proxy. The CLI
+  ships as a Homebrew formula and as signed tarballs on a first-party S3 bucket; the
+  infrastructure provider is published to the OpenTofu registry and is NOT present on the
+  HashiCorp Terraform registry (registry.terraform.io/v1/providers/spirl/spirl returned 404
+  on 2026-08-12), so `terraform init` cannot resolve it from the default registry without an
+  explicit `registry.opentofu.org/spirl/spirl` source line — which is exactly what the
+  provider's own release notes instruct. No npm, PyPI, Maven, NuGet, RubyGems, Packagist or
+  crates.io packages were found under either the `spirl` or `defakto` names.
+registries_checked:
+- registry: go
+  endpoint: https://proxy.golang.org
+  result: hit
+- registry: opentofu
+  endpoint: https://api.opentofu.org/registry/docs/providers/spirl/spirl/index.json
+  result: hit
+- registry: terraform
+  endpoint: https://registry.terraform.io/v1/providers/spirl/spirl
+  result: miss
+  http_status: 404
+- registry: npm
+  result: miss
+- registry: pypi
+  result: miss
+- registry: maven
+  result: miss
+- registry: nuget
+  result: miss
+- registry: rubygems
+  result: miss
+- registry: packagist
+  result: miss
+- registry: crates.io
+  result: miss
+packages:
+- language: go
+  registry: go
+  name: github.com/spirl/spirl-sdk-go
+  url: https://pkg.go.dev/github.com/spirl/spirl-sdk-go
+  source: https://github.com/spirl/spirl-sdk-go
+  install: go get github.com/spirl/spirl-sdk-go@latest
+  official: true
+  version: v0.3.6
+  published: '2026-06-11'
+  version_source: https://proxy.golang.org/github.com/spirl/spirl-sdk-go/@latest
+  note: >-
+    The first-party Go client for the Defakto Management API. Source-available: the repo
+    README states "Outside contributions are not accepted." Carries the generated gRPC
+    bindings for all sixteen control-plane services under spirlsdk/internal/protos, which
+    is the only public expression of the API contract Defakto ships.
+- language: go
+  registry: go
+  name: github.com/defakto-security/spiffecli
+  url: https://pkg.go.dev/github.com/defakto-security/spiffecli
+  source: https://github.com/defakto-security/spiffecli
+  install: go install github.com/defakto-security/spiffecli@latest
+  official: true
+  version: v0.1.3
+  published: '2026-07-02'
+  version_source: https://proxy.golang.org/github.com/defakto-security/spiffecli/@latest
+  note: >-
+    Standalone SPIFFE CLI that runs a SPIFFE Workload API locally and requests/validates
+    SVIDs. Not the platform CLI (that is spirlctl) — see cli/defakto-security-cli.yml.
+- language: hcl
+  registry: opentofu
+  name: spirl/spirl
+  url: https://search.opentofu.org/provider/spirl/spirl/latest
+  source: https://github.com/spirl/terraform-provider-spirl
+  install: |
+    terraform {
+      required_providers {
+        spirl = {
+          source = "registry.opentofu.org/spirl/spirl"
+        }
+      }
+    }
+  official: true
+  version: v0.13.1
+  published: '2026-08-07'
+  version_source: https://api.opentofu.org/registry/docs/providers/spirl/spirl/index.json
+  note: >-
+    OpenTofu-registry only. Absent from the HashiCorp Terraform registry, so Terraform users
+    must pin the OpenTofu source address explicitly. Supports secretless auth via Workload
+    Identity Federation (see iam/terraform-wif).
+- language: shell
+  registry: homebrew
+  name: spirl/tap/spirlctl
+  url: https://github.com/spirl/homebrew-tap
+  source: https://github.com/spirl/homebrew-tap/blob/main/Formula/spirlctl.rb
+  install: |
+    brew tap spirl/tap
+    brew install spirlctl
+  official: true
+  version: 0.35.0
+  published: '2026-07-29'
+  version_source: https://raw.githubusercontent.com/spirl/homebrew-tap/main/Formula/spirlctl.rb
+  note: >-
+    GoReleaser-generated formula. The formula still points `homepage` at the pre-rebrand
+    https://www.spirl.com/. Binaries are SHA256-pinned against
+    spirl-releases.s3.us-west-2.amazonaws.com. Published date is the tap repo's last push;
+    Homebrew taps expose no per-formula release timestamp.
+- language: yaml
+  registry: github-actions
+  name: defakto-security/setup-spiffe
+  url: https://github.com/defakto-security/setup-spiffe
+  source: https://github.com/defakto-security/setup-spiffe
+  install: 'uses: defakto-security/setup-spiffe@main'
+  official: true
+  version: null
+  published: null
+  version_source: null
+  note: >-
+    GitHub Action that sets up SPIFFE in a workflow and supports the standard SPIFFE Workload
+    API gRPC protocol over a Unix socket. Checked 2026-08-12: the repository publishes no
+    tagged releases, so there is no version to record and consumers must pin a branch or a
+    commit SHA. An unversioned, unpinned action is the distribution finding here — a consumer
+    referencing @main cannot tell what they are getting either.
+container_images:
+- name: spirl-server
+  registry: ghcr.io
+  image: ghcr.io/spirl/spirl-server:v0.38.0
+  version: v0.38.0
+  published: '2026-07-24'
+  url: https://github.com/orgs/spirl/packages/container/package/spirl-server
+  official: true
+  source: https://d.defakto.security/releases/spirl-server.md
+helm_charts:
+- name: spirl-server
+  registry: oci
+  chart: oci://ghcr.io/spirl/charts/spirl-server:0.38.0
+  version: 0.38.0
+  published: '2026-07-24'
+  url: https://github.com/orgs/spirl/packages/container/package/charts%2Fspirl-server
+  official: true
+  source: https://d.defakto.security/releases/spirl-server.md
+- name: spiffe-demo-app
+  registry: helm-http
+  repo: https://spirl.github.io/spiffe-demo-app
+  install: helm repo add spiffe-demo https://spirl.github.io/spiffe-demo-app
+  version: 0.4.4
+  published: '2026-06-05'
+  official: true
+  note: Demo application used by the published quick start, not a production component.
+binaries:
+- name: spirlctl
+  version: 0.35.0
+  published: '2026-07-29'
+  distribution: s3-tarball
+  url: https://spirl-releases.s3.us-west-2.amazonaws.com/spirlctl/v0.35.0/
+  platforms:
+  - linux-amd64
+  - linux-arm64
+  - darwin-amd64
+  - darwin-arm64
+  - windows-amd64
+  - windows-arm64
+  source: https://d.defakto.security/releases/spirlctl.md
+  note: Version pinned in the URL path; SHA256 published per-asset in the Homebrew formula.
+sdk_count: 3
+official_sdk_count: 3

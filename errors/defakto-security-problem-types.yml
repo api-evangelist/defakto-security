@@ -1,0 +1,122 @@
+generated: '2026-08-12'
+method: derived
+source: github.com/spirl/spirl-sdk-go/spirlsdk/internal/xerrors/convert.go
+format: grpc-status
+note: >-
+  Not RFC 9457. Defakto's API is gRPC, so the error envelope is the gRPC status
+  (code + message + details), never application/problem+json — there is no HTTP status code
+  or Problem Details document to catalogue. Defakto publishes no error reference page; the
+  only authoritative error surface it ships is the Go SDK's status-to-error conversion in
+  internal/xerrors, which is what this file is derived from.
+  The finding worth recording: of the sixteen gRPC codes the SDK's Convert() switches on,
+  exactly TWO are mapped to a named, matchable sentinel error (NotFound, Unauthenticated).
+  The other fourteen cases are present in the switch as empty branches and fall through
+  unchanged, so an SDK consumer has no typed way to distinguish PermissionDenied from
+  Internal from Unavailable — they must reach past the SDK to google.golang.org/grpc/status
+  themselves. That is a real ergonomics gap in a first-party client, not a documentation gap.
+envelope:
+  transport: gRPC
+  shape: google.rpc.Status
+  fields:
+  - code
+  - message
+  - details
+  content_type: application/grpc
+sentinel_errors:
+- name: ErrNotFound
+  exported_as: spirlsdk.ErrNotFound
+  grpc_code: NOT_FOUND
+  message: not found
+  wraps_status_message: true
+  remediation: Verify the identifier and the caller's realm/trust-domain scope.
+- name: ErrUnauthenticated
+  exported_as: spirlsdk.ErrUnauthenticated
+  grpc_code: UNAUTHENTICATED
+  message: unauthenticated
+  wraps_status_message: true
+  remediation: >-
+    Re-establish a session — `spirlctl login`, a service-account key challenge, or a WIF
+    token exchange. Sessions are short-lived by design.
+- name: ErrOutOfDate
+  exported_as: spirlsdk.ErrOutOfDate
+  grpc_code: null
+  message: out-of-date SDK
+  source: client-side
+  raised_by:
+  - UnexpectedResponseField(field)
+  - UnexpectedResponseType(field, type)
+  remediation: >-
+    The server returned a field or type the installed SDK does not recognise. Upgrade
+    github.com/spirl/spirl-sdk-go. This is a forward-compatibility signal, not a server error.
+- name: AmbiguousOrgError
+  exported_as: spirlsdk (struct)
+  grpc_code: null
+  message: 'multiple org memberships: must provide org to authenticate with'
+  fields:
+  - Orgs
+  source: client-side
+  remediation: Pass an explicit org (`spirlctl login --org <org>`).
+grpc_codes_handled_note: >-
+  Enumerated verbatim from the switch in xerrors.Convert. `mapped: false` means the case
+  exists but does nothing — the raw gRPC error is returned untranslated.
+grpc_codes_handled:
+- code: OK
+  mapped: false
+- code: CANCELED
+  mapped: false
+- code: UNKNOWN
+  mapped: false
+- code: INVALID_ARGUMENT
+  mapped: false
+- code: DEADLINE_EXCEEDED
+  mapped: false
+- code: NOT_FOUND
+  mapped: true
+  sentinel: ErrNotFound
+- code: ALREADY_EXISTS
+  mapped: false
+- code: PERMISSION_DENIED
+  mapped: false
+  note: >-
+    Expected to be common given the five-role RBAC model, yet untyped in the SDK. Callers
+    must inspect the raw status code to tell a permission failure from any other failure.
+- code: RESOURCE_EXHAUSTED
+  mapped: false
+  note: The only code that would signal rate limiting. Untyped, and no limits are documented.
+- code: FAILED_PRECONDITION
+  mapped: false
+- code: ABORTED
+  mapped: false
+- code: OUT_OF_RANGE
+  mapped: false
+- code: UNIMPLEMENTED
+  mapped: false
+- code: INTERNAL
+  mapped: false
+- code: UNAVAILABLE
+  mapped: false
+- code: DATA_LOSS
+  mapped: false
+- code: UNAUTHENTICATED
+  mapped: true
+  sentinel: ErrUnauthenticated
+domain_validation_errors_note: >-
+  The config service returns structured validation errors as protobuf messages rather than
+  status details. These are real message types in grpc/defakto-security-configapi.proto.
+domain_validation_errors:
+- message: SchemaValidationError
+  service: configapi
+- message: SectionValidationError
+  service: configapi
+- message: SpecValidationError
+  service: configapi
+- message: DescribeClusterError
+  service: clusterapi
+coverage:
+  sentinels: 4
+  grpc_codes_enumerated: 17
+  grpc_codes_typed: 2
+  docs_error_reference: null
+  docs_error_reference_note: >-
+    No error-code reference page exists anywhere on d.defakto.security; the llms.txt index of
+    the full documentation site lists none.

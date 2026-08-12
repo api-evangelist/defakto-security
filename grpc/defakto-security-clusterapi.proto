@@ -1,0 +1,408 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/clusterapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.cluster;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+enum Platform {
+  PLATFORM_UNSPECIFIED = 0;
+  PLATFORM_KUBERNETES = 1;
+  PLATFORM_ISTIO = 2;
+  PLATFORM_EKS = 3;
+  PLATFORM_EKS_ISTIO = 4;
+  PLATFORM_LINUX = 6;
+}
+
+enum WorkloadType {
+  WORKLOADTYPE_UNKNOWN = 0;
+  WORKLOADTYPE_X509 = 1;
+  WORKLOADTYPE_JWT = 2;
+}
+
+enum WorkloadState {
+  WORKLOADSTATE_UNKNOWN = 0;
+  WORKLOADSTATE_ACTIVE = 1;
+  WORKLOADSTATE_EXPIRING = 2;
+  WORKLOADSTATE_EXPIRED = 3;
+}
+
+message ListClustersRequest {
+  // Optional. The ID of the trust domain to filter the cluster list by.
+  string trust_domain_id = 2;
+  // Optional. The name of the cluster to filter the cluster list by.
+  string cluster_name = 3;
+  // Optional. The ID of the realm to filter the cluster list by.
+  string realm_id = 4;
+}
+
+message ListClustersResponse {
+  repeated Cluster clusters = 1;
+}
+
+message ListClustersV2Request {
+  // Optional. The ID of the trust domain to filter the cluster list by.
+  string trust_domain_id = 1;
+  // Optional. The name of the cluster to filter the cluster list by.
+  string cluster_name = 2;
+  // Optional. The ID of the realm to filter the cluster list by.
+  string realm_id = 3;
+  // Optional. Limit the number of results returned. If not set, the max page size is returned
+  // (set in service code). Larger values are coerced down.
+  uint32 page_size = 4;
+  // Page token. If not set, returns first page.
+  string page_token = 5;
+}
+
+message ListClustersV2Response {
+  repeated ClusterItem clusters = 1;
+  // Next page token. Not set if there are no more pages.
+  string next_page_token = 2;
+}
+
+message DescribeClustersRequest {
+  // Identifiers of clusters to describe.
+  repeated DescribeClusterId ids = 1;
+  // If true, the response returns per-cluster errors alongside successful results and the RPC
+  // itself succeeds even when some items fail. If false (default), the server preserves the
+  // legacy behavior of failing the entire RPC with a top-level error when any item cannot be
+  // described, and the response `errors` field is left empty. New clients should set this to
+  // true and parse the response accordingly.
+  bool per_cluster_errors = 2;
+}
+
+message DescribeClustersResponse {
+  // Per-input cluster results. Matches request order and length 1:1 with errors. If
+  // errors[i].code != 0, clusters[i] is an empty placeholder.
+  repeated Cluster clusters = 1;
+  // Per-input status. Matches request order and length 1:1 with clusters. code == 0 means
+  // success for that item. Only populated when the request sets `per_cluster_errors = true`;
+  // otherwise left empty (the RPC fails with a top-level error on any per-item failure).
+  repeated DescribeClusterError errors = 2;
+}
+
+message DescribeClusterError {
+  // gRPC canonical code value (e.g. 5 = NOT_FOUND). 0 means no error.
+  int32 code = 1;
+  string message = 2;
+  // Optional field key that caused the per-item error.
+  string field = 3;
+}
+
+message DeleteClusterRequest {
+  // Required. The ID of the cluster to delete.
+  string cluster_id = 3;
+}
+
+message DeleteClusterResponse {
+}
+
+message DescribeClusterId {
+  // Cluster ID
+  string id = 1;
+  // User supplied name of this cluster
+  string name = 2;
+  // Trust Domain ID this cluster is associated with
+  string trust_domain_id = 3;
+}
+
+message CreateClusterRequest {
+  // Required. The ID of the trust domain to add the cluster version to.
+  string trust_domain_id = 1;
+  // Required. The ID of the trust domain to add the cluster version to.
+  string cluster_name = 2;
+  // Required. The platform running the cluster.
+  Platform platform = 3;
+  // Optional. A description of the cluster.
+  string description = 5;
+  // Optional. The path template for the cluster.
+  string path_template = 6;
+  // [DEPRECATED: Create a CI/CD Profile Link instead] Optional. The cicd profile for the
+  // cluster.
+  string cicd_profile_name = 7;
+  // Optional. The x509 SVID customization template for the cluster.
+  string x509_customization_template = 8;
+  // Optional. The provider attestation config.
+  string provider_attestation_config_id = 9;
+  // Optional. The JWT customization template for the cluster. The template includes user-defined
+  // claim names where the values must be attributes emitted by the cluster. Example: namespace={
+  // {kubernetes.pod.namespace}},pod_service_account={{kubernetes.pod.service_account}}
+  string jwt_customization_template = 10;
+  // Optional. Whether the reflector is enabled.
+  BoolValue reflector_enabled = 11;
+  // Optional. The ID of the realm this cluster belongs to.
+  string realm_id = 13;
+  // Optional. The agent attestation config.
+  string agent_attestation_config_id = 14;
+}
+
+message CreateClusterResponse {
+  // The ID of the cluster version that was added.
+  string cluster_version_id = 1;
+}
+
+message NewClusterVersionRequest {
+  // Required. The ID of the trust domain to add the cluster version to.
+  string trust_domain_id = 1;
+  // Required. The ID of the cluster.
+  string cluster_id = 5;
+  // Optional. The path template for the cluster.
+  string path_template = 6;
+  // Optional. The x509 SVID customization template for the cluster. If not provided - the value
+  // of the previous cluster version is copied. If empty string - template set to be an empty
+  // string (effectively disabling customization).
+  string x509_customization_template = 7;
+  // Optional. The provider attestation config. If unset, use the value from the previous cluster
+  // version. If "", clear the provider attestation config. Otherwise, set/update the provider
+  // attestation config.
+  string provider_attestation_config_id = 8;
+  // Optional. The JWT customization template for the cluster. The template includes user-defined
+  // claim names where the values must be attributes emitted by the cluster. If not provided -
+  // the value of the previous cluster version is copied. If empty string - template set to be an
+  // empty string (effectively disabling JWT-SVID customization). Example: namespace={{kubernetes
+  // .pod.namespace}},pod_service_account={{kubernetes.pod.service_account}}
+  string jwt_customization_template = 9;
+  // Optional. Whether the reflector is enabled.
+  BoolValue reflector_enabled = 10;
+  // Optional. The agent attestation config. If unset, use the value from the previous cluster
+  // version. If "", clear the agent attestation config. Otherwise, set/update the agent
+  // attestation config.
+  string agent_attestation_config_id = 12;
+}
+
+message NewClusterVersionResponse {
+  // The ID of the cluster version that was added.
+  string cluster_version_id = 1;
+}
+
+message ActivateClusterVersionRequest {
+  // Required. The ID of the cluster version to activate.
+  string cluster_version_id = 1;
+}
+
+message ActivateClusterVersionResponse {
+}
+
+message DeactivateClusterVersionRequest {
+  // Required. The ID of the cluster version to deactivate.
+  string cluster_version_id = 1;
+}
+
+message DeactivateClusterVersionResponse {
+}
+
+message DeleteClusterVersionRequest {
+  // Required. The ID of the cluster version to delete.
+  string cluster_version_id = 1;
+  // Optional. If true, the version will be deleted even if it is still active.
+  bool force = 2;
+}
+
+message DeleteClusterVersionResponse {
+}
+
+message ListClusterVersionsRequest {
+  // Required. The ID of the cluster to list versions for.
+  string cluster_id = 1;
+}
+
+message ListClusterVersionsResponse {
+  repeated ClusterVersion cluster_versions = 1;
+}
+
+message ListWorkloadsRequest {
+  // Required. The ID of the cluster to list versions for.
+  string cluster_id = 1;
+  // Optional. The version of the cluster version. If not set, will return the aggregated status
+  // of all versions.
+  string cluster_version_id = 2;
+  // Optional. The duration within which the returned workloads are issued.
+  google.protobuf.Duration issued_within = 3;
+}
+
+message ListWorkloadsResponse {
+  // List of {spiffe-id, type, ...} tuples.
+  repeated WorkloadCount workloads = 1;
+}
+
+message ListNodesRequest {
+  // Required. The ID of the cluster to list nodes for
+  string cluster_id = 1;
+  // Optional. The version of the cluster version. If not set, will return nodes for all
+  // versions.
+  string cluster_version_id = 2;
+  // Optional. The duration within which the returned nodes were last seen.
+  google.protobuf.Duration last_seen_within = 3;
+}
+
+message ListNodesResponse {
+  // List of nodes.
+  repeated Node nodes = 1;
+}
+
+message ClusterItem {
+  // ID for the cluster
+  string id = 1;
+  // User supplied name of this cluster
+  string name = 2;
+  // User supplied description of this cluster
+  string description = 3;
+  // Platform that this cluster is running
+  Platform platform = 4;
+  // Org ID this cluster is associated with
+  string org_id = 5;
+  // Trust Domain ID this cluster is associated with
+  string trust_domain_id = 6;
+  // Optional. The ID of the realm this cluster belongs to.
+  string realm_id = 7;
+  // The time when this cluster was created
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message Cluster {
+  // ID for the cluster
+  string id = 2;
+  // User supplied name of this cluster
+  string name = 3;
+  // Platform that this cluster is running
+  Platform platform = 4;
+  // Template used to construct the path of the SVIDs for this cluster
+  string path_template = 5;
+  // Org ID this cluster is associated with
+  string org_id = 6;
+  // Trust Domain ID this cluster is associated with
+  string trust_domain_id = 7;
+  // Trust Domain name this cluster is associated with
+  string trust_domain_name = 8;
+  // Number of versions associated with this cluster
+  int64 num_versions = 9;
+  // An estimate of the last time this version was used by an agent.
+  google.protobuf.Timestamp estimated_last_used = 10;
+  // Count of active agents running in the cluster.
+  int64 num_active_agents = 11;
+  // Count of unique workload IDs in active credentials. We don't know if the workload IDs are
+  // used.
+  int64 estimated_num_active_workloads = 12;
+  // The time when this cluster was created
+  google.protobuf.Timestamp created_at = 13;
+  // User supplied description of this cluster
+  string description = 14;
+  // [DEPRECATED] CI/CD Profile ID this cluster is associated with
+  string ci_cd_profile_id = 15;
+  // [DEPRECATED] CI/CD Profile Name this cluster is associated with
+  string ci_cd_profile_name = 16;
+  // Optional template to customize minted x509 SVIDs.
+  string x509_customization_template = 17;
+  // Count of unique workload IDs in all credentials, both active and inactive.
+  int64 estimated_num_workloads = 18;
+  // Count of active credentials. We don't know if the credentials are used.
+  int64 estimated_num_active_credentials = 19;
+  // Count of all credentials, both active and inactive.
+  int64 estimated_num_credentials = 20;
+  // Optional. The JWT customization template for the cluster. The template includes user-defined
+  // claim names where the values must be attributes emitted by the cluster. Example: namespace={
+  // {kubernetes.pod.namespace}},pod_service_account={{kubernetes.pod.service_account}}
+  string jwt_customization_template = 21;
+  // Optional. The ID of the realm this cluster belongs to.
+  string realm_id = 22;
+}
+
+message ClusterVersion {
+  // ID of the cluster version.
+  string id = 1;
+  // ID of the cluster this version belongs to.
+  string cluster_id = 2;
+  // The platform running the cluster.
+  Platform platform = 3;
+  // Template for constructing the path component of the SPIFFE ID
+  string path_template = 5;
+  // Whether or not the cluster version is active.
+  bool active = 6;
+  // An estimate of the last time this version was used by an agent.
+  google.protobuf.Timestamp estimated_last_used = 7;
+  // The time when this cluster version was created
+  google.protobuf.Timestamp created_at = 8;
+  // Number of active agents.
+  int64 num_active_agents = 9;
+  // Count of unique workload IDs in active credentials. We don't know if the workload IDs are
+  // used.
+  int64 estimated_num_active_workloads = 10;
+  // Optional template for x509 SVIDs customization
+  string x509_customization_template = 11;
+  // Optional. The provider attestation config.
+  string provider_attestation_config_name = 12;
+  // Count of unique workload IDs in all credentials, both active and inactive.
+  int64 estimated_num_workloads = 13;
+  // Count of active credentials. We don't know if the credentials are used.
+  int64 estimated_num_active_credentials = 14;
+  // Optional. The JWT customization template for the cluster. The template includes user-defined
+  // claim names where the values must be attributes emitted by the cluster. Example: namespace={
+  // {kubernetes.pod.namespace}},pod_service_account={{kubernetes.pod.service_account}}
+  string jwt_customization_template = 15;
+  // Optional. The agent attestation config.
+  string agent_attestation_config_id = 16;
+  // Count of all credentials, both active and inactive.
+  int64 estimated_num_credentials = 25;
+}
+
+message PKIXPublicKey {
+  bytes data = 1;
+}
+
+message KubernetesDeployment {
+  // This YAML contains the following important dynamic configuration: - trust domain endpoint
+  string kubectl_yaml = 1;
+}
+
+message VMDeployment {
+  string agent_configuration_file = 1;
+  // optional. Run the agent as a docker container
+  string docker_compose_yaml = 2;
+}
+
+message WorkloadCount {
+  string id = 1;
+  WorkloadType type = 2;
+  int64 count = 3;
+  google.protobuf.Timestamp last_issued = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  WorkloadState state = 6;
+}
+
+message Node {
+  string agent_id = 1;
+  string hostname = 2;
+  string machine_id_hash = 3;
+  string ip_address = 4;
+  google.protobuf.Timestamp last_seen = 5;
+}
+
+service API {
+  rpc CreateCluster(CreateClusterRequest) returns (CreateClusterResponse);
+  rpc ListClusters(ListClustersRequest) returns (ListClustersResponse);
+  rpc ListClustersV2(ListClustersV2Request) returns (ListClustersV2Response);
+  rpc DescribeClusters(DescribeClustersRequest) returns (DescribeClustersResponse);
+  rpc DeleteCluster(DeleteClusterRequest) returns (DeleteClusterResponse);
+  rpc NewClusterVersion(NewClusterVersionRequest) returns (NewClusterVersionResponse);
+  rpc ActivateClusterVersion(ActivateClusterVersionRequest) returns (ActivateClusterVersionResponse);
+  rpc DeactivateClusterVersion(DeactivateClusterVersionRequest) returns (DeactivateClusterVersionResponse);
+  rpc DeleteClusterVersion(DeleteClusterVersionRequest) returns (DeleteClusterVersionResponse);
+  rpc ListClusterVersions(ListClusterVersionsRequest) returns (ListClusterVersionsResponse);
+  rpc ListWorkloads(ListWorkloadsRequest) returns (ListWorkloadsResponse);
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+}

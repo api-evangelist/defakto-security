@@ -1,0 +1,43 @@
+generated: '2026-08-12'
+method: searched
+source: https://www.defakto.security/
+note: >-
+  Defakto publishes no pricing of any kind. There is no pricing page, no tier table, no
+  per-credential or per-workload unit price, no free tier and no self-service signup — the
+  only commercial entry point on the entire site is a "Request a Demo" form. This is a pure
+  enterprise sales-gated model, which is normal for this category but means an evaluator
+  cannot size a deployment or compare cost without a sales conversation.
+  Recorded as an explicit zero rather than omitted, so the absence is countable.
+plan_count: 0
+free_tier: false
+self_service_signup: false
+trial: unknown
+model: enterprise-contact-sales
+currency: null
+plans: []
+evidence:
+- url: https://www.defakto.security/pricing/
+  status: 404
+- url: https://www.defakto.security/pricing
+  status: 404
+- url: https://www.defakto.security/llms.txt
+  status: 200
+  note: >-
+    The site's own llms.txt enumerates every page it wants an agent to know about — Pages,
+    Posts, Products and Use Cases — and no pricing page appears in any section. The absence is
+    the provider's own account of its site, not just a failed guess at a URL.
+- url: https://www.defakto.security/demo/
+  status: 200
+  note: The sole commercial call to action.
+sales_contact:
+- https://www.defakto.security/demo/
+- https://www.defakto.security/contact/
+products_marketed:
+- name: Mint
+  description: Workload identity — issuing X.509-SVIDs, JWT-SVIDs and WIT-SVIDs to non-human identities.
+- name: Ledger
+  description: >-
+    Secret discovery, risk scoring and eradication. Reached General Availability 2026-06-11
+    (spirlctl 0.33.0).
+- name: Reflector (Downtime Protection)
+  description: Credential caching proxy. Private preview; explicitly "not publicly available".

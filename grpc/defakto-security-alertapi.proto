@@ -1,0 +1,168 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/alertapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.alert;
+
+import "google/protobuf/timestamp.proto";
+
+enum AlertPriority {
+  ALERT_PRIORITY_UNSPECIFIED = 0;
+  ALERT_PRIORITY_CRITICAL = 1;
+  ALERT_PRIORITY_HIGH = 2;
+  ALERT_PRIORITY_MEDIUM = 3;
+  ALERT_PRIORITY_LOW = 4;
+  ALERT_PRIORITY_INFORMATIONAL = 5;
+  ALERT_PRIORITY_TEST = 6;
+}
+
+message GetAlertConfigRequest {
+  // Required. The alert configuration ID.
+  string alert_config_id = 1;
+}
+
+message GetAlertConfigResponse {
+  // The alert configuration.
+  AlertConfig configuration = 1;
+}
+
+message ListAlertConfigsRequest {
+  // Optional. The trust domain ID to filter the alert configurations. If not provided, all alert
+  // configurations for the organization will be returned.
+  string trust_domain_id = 1;
+}
+
+message ListAlertConfigsResponse {
+  // The list of alert configurations.
+  repeated AlertConfig configurations = 1;
+}
+
+message CreateAlertConfigRequest {
+  // Required. The trust domain ID.
+  string trust_domain_id = 1;
+  // Required. The emails to have in the alert configuration.
+  repeated string emails = 2;
+}
+
+message CreateAlertConfigResponse {
+  // The created alert configuration.
+  AlertConfig configuration = 1;
+}
+
+message AlertConfig {
+  // The ID of the alert configuration.
+  string id = 1;
+  // The trust domain ID associated with this alert configuration.
+  string trust_domain_id = 2;
+  // The trust domain name associated with this alert configuration.
+  string trust_domain_name = 3;
+  // E-mail configuration for alert.
+  repeated EmailConfig email_configs = 4;
+}
+
+message DeleteAlertConfigRequest {
+  // Required. The alert configuration ID.
+  string alert_config_id = 1;
+}
+
+message DeleteAlertConfigResponse {
+}
+
+message EmailConfig {
+  // The ID of the email configuration.
+  string id = 1;
+  // E-mail address to send alerts to.
+  string email = 2;
+  // Output only. Timestamp of when the verification email was sent.
+  google.protobuf.Timestamp verification_sent_at = 3;
+  // Output only. Timestamp of when the verification code expires.
+  google.protobuf.Timestamp verification_code_expires_at = 4;
+  // Output only. Timestamp of when the email was verified. If the email has not been verified,
+  // this field will be unset.
+  google.protobuf.Timestamp verified_at = 5;
+}
+
+message SendVerificationEmailRequest {
+  // Required. The ID of the email configuration to send the verification email to.
+  string email_config_id = 1;
+}
+
+message SendVerificationEmailResponse {
+  // Output only. The status of the email sending operation.
+  string status = 1;
+}
+
+message VerifyEmailRequest {
+  // Required. The verification code. The email address associated with this code will be
+  // verified if the code is valid and not expired.
+  string verification_code = 1;
+}
+
+message VerifyEmailResponse {
+}
+
+message ListAlertsRequest {
+  // Required. The alert configuration ID.
+  string alert_config_id = 1;
+  // Page size. Defaults to 10 if not set, which is a convenient value for the UI. The maximum
+  // allowed value is 250 and if exceeded, will be coerced down to the maximum allowed value.
+  uint32 page_size = 2;
+  // Page token. If not set, will return the first page limit by page_size.
+  string page_token = 3;
+}
+
+message ListAlertsResponse {
+  // The list of alerts.
+  repeated Alert alerts = 1;
+  // The next page token. If empty, there are no more pages.
+  string next_page_token = 2;
+}
+
+message Alert {
+  // The ID of the alert.
+  string id = 1;
+  // The ID of the alert configuration this alert is associated with.
+  string alert_config_id = 2;
+  // The priority of the alert.
+  AlertPriority priority = 3;
+  // The alert title.
+  string title = 4;
+  // The alert message.
+  string message = 5;
+  // The timestamp when the alert was created.
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message CreateTestAlertRequest {
+  // Required. The alert configuration ID.
+  string alert_config_id = 1;
+}
+
+message CreateTestAlertResponse {
+  // The created test alert.
+  Alert alert = 1;
+}
+
+service API {
+  rpc GetAlertConfig(GetAlertConfigRequest) returns (GetAlertConfigResponse);
+  rpc ListAlertConfigs(ListAlertConfigsRequest) returns (ListAlertConfigsResponse);
+  rpc CreateAlertConfig(CreateAlertConfigRequest) returns (CreateAlertConfigResponse);
+  rpc DeleteAlertConfig(DeleteAlertConfigRequest) returns (DeleteAlertConfigResponse);
+  rpc SendVerificationEmail(SendVerificationEmailRequest) returns (SendVerificationEmailResponse);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  rpc ListAlerts(ListAlertsRequest) returns (ListAlertsResponse);
+  rpc CreateTestAlert(CreateTestAlertRequest) returns (CreateTestAlertResponse);
+}

@@ -1,23 +1,186 @@
 aid: defakto-security
 name: Defakto Security
-description: 'Defakto Security is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: 'Defakto (formerly SPIRL) is a non-human identity (NHI) security company that
+  issues short-lived, cryptographically attested identities to workloads, services, CI/CD
+  pipelines and AI agents in place of static secrets, API keys and long-lived service accounts.
+  The platform is built on SPIFFE and ships two products: Mint, which runs Trust Domain Servers
+  and Agents that mint X.509-SVIDs, JWT-SVIDs and proof-of-possession WIT-SVIDs for Kubernetes,
+  Linux, Docker and serverless workloads under a dozen attestation methods; and Ledger, which
+  discovers, risk-scores and eradicates static secrets across AWS, Azure, GCP, Kubernetes,
+  Anthropic, OpenAI, Bedrock AgentCore and Gemini. The control plane is driven by a gRPC
+  management API and the spirlctl CLI, with a Go SDK, an OpenTofu/Terraform provider, workload
+  identity federation into AWS/Azure/GCP, and OCSF 1.8.0 audit logging.'
 url: https://raw.githubusercontent.com/api-evangelist/defakto-security/refs/heads/main/apis.yml
+image: https://www.defakto.security/wp-content/uploads/2025/09/defakto-logo.svg
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-12'
 modified: '2026-08-12'
 tags:
-- Company
-apis: []
+- Security
+- Identity
+- Non-Human Identity
+- Workload Identity
+- SPIFFE
+- Authentication
+- Zero Trust
+- Secrets Management
+- Kubernetes
+- CI/CD
+- Cloud Security
+- gRPC
+- Machine Identity
+- Agentic AI
+apis:
+- aid: defakto-security-management-api
+  name: Defakto Management API
+  description: 'The Defakto control-plane API. A gRPC service surface of sixteen versioned
+    services covering trust domains, clusters, realms, workloads, access policy, service
+    accounts and sessions, agent and provider attestation, CI/CD profiles, federation,
+    developer identity, managed configuration, alerts, statistics and the Ledger secret
+    scanner. It is the API behind the console at console.defakto.security and the spirlctl
+    CLI. There is no REST/OpenAPI surface: the transport is gRPC over HTTP/2 on port 443,
+    and the contract is distributed as generated client bindings in the Go SDK rather than
+    as published .proto files.'
+  humanURL: https://d.defakto.security/
+  baseURL: https://api.defakto.security
+  tags:
+  - Identity
+  - Workload Identity
+  - gRPC
+  - Security
+  properties:
+  - type: Documentation
+    url: https://d.defakto.security/
+  - type: GettingStarted
+    url: https://d.defakto.security/mint/quick-start.md
+  - type: Authentication
+    url: authentication/defakto-security-authentication.yml
+  - type: Protobuf
+    url: grpc/_index.yml
+  - type: Protobuf
+    url: grpc/defakto-security-trustdomainapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-clusterapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-accessapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-workloadsapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-realmapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-sessionapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-scannerapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-configapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-federationapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-cicdapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-devidentityapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-agentattestationapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-providerattestationapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-alertapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-statisticsapi.proto
+  - type: Protobuf
+    url: grpc/defakto-security-listing.proto
+  - type: ErrorCatalog
+    url: errors/defakto-security-problem-types.yml
+  - type: DataModel
+    url: data-model/defakto-security-data-model.yml
+- aid: defakto-security-legacy-management-api
+  name: SPIRL Management API (legacy)
+  description: 'The pre-rebrand SPIRL control-plane endpoint, still documented and still
+    serving the legacy app.spirl.com console and the spirlctl CLI alongside the current
+    api.defakto.security host. Same gRPC service surface; Defakto lists both hosts in its
+    published network-requirements allowlist, so the legacy host is live rather than
+    retired.'
+  humanURL: https://d.defakto.security/mint/install/endpoints.md
+  baseURL: https://api.spirl.com
+  tags:
+  - Identity
+  - gRPC
+  - Legacy
+  properties:
+  - type: Documentation
+    url: https://d.defakto.security/mint/install/endpoints.md
+  - type: Lifecycle
+    url: lifecycle/defakto-security-lifecycle.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: VulnerabilityDisclosure
+  url: security/defakto-security-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/defakto-security-domain-security.yml
 - type: Website
-  url: https://forgeglobal.com/defakto-security_stock/
+  url: https://www.defakto.security/
+- type: DeveloperPortal
+  url: https://d.defakto.security/
+- type: Documentation
+  url: https://d.defakto.security/
+- type: APIReference
+  url: https://d.defakto.security/cli/spirlctl/overview.md
+- type: GettingStarted
+  url: https://d.defakto.security/mint/quick-start.md
+- type: Blog
+  url: https://www.defakto.security/blog/
+- type: GitHubOrganization
+  url: https://github.com/defakto-security
+- type: Support
+  url: https://www.defakto.security/contact/
+- type: SignUp
+  url: https://www.defakto.security/demo/
+- type: TermsOfService
+  url: https://www.defakto.security/terms-of-use/
+- type: PrivacyPolicy
+  url: https://www.defakto.security/privacy-policy/
+- type: Security
+  url: https://www.defakto.security/security/
+- type: LLMsTxt
+  url: llms/defakto-security-llms.txt
+- type: Packages
+  url: packages/defakto-security-packages.yml
+- type: SDKs
+  url: packages/defakto-security-packages.yml
+- type: CLI
+  url: cli/defakto-security-cli.yml
+- type: Authentication
+  url: authentication/defakto-security-authentication.yml
+- type: Conventions
+  url: conventions/defakto-security-conventions.yml
+- type: Conformance
+  url: conformance/defakto-security-conformance.yml
+- type: ErrorCatalog
+  url: errors/defakto-security-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/defakto-security-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/defakto-security-lifecycle.yml
+- type: ChangeLog
+  url: changelog/defakto-security-changelog.yml
+- type: DataModel
+  url: data-model/defakto-security-data-model.yml
+- type: Sandbox
+  url: sandbox/defakto-security-sandbox.yml
+- type: Plans
+  url: plans/defakto-security-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/defakto-security-rate-limits.yml
+- type: AgentSkill
+  url: skills/_index.yml
+x-enrichment:
+  date: '2026-08-12'
+  status: enriched
+  artifacts_added: 39
+  pass: local-v1

@@ -1,0 +1,325 @@
+generated: '2026-08-12'
+method: derived
+source: grpc/*.proto
+derived_from: >-
+  The 390 protobuf messages reconstructed in grpc/, themselves read from the generated
+  bindings published in github.com/spirl/spirl-sdk-go. Relationships are taken from real
+  *_id reference fields and real embedded message types — nothing here is inferred from
+  naming alone unless marked confidence: medium.
+note: >-
+  The Defakto object graph is a strict containment hierarchy rooted at the Organization.
+  A trust domain is the SPIFFE trust root; realms subdivide it for delegated administration;
+  clusters attach to a trust domain (optionally inside a realm); agents run in clusters and
+  attest workloads; every credential minted is emitted as an SVIDIssuedEvent. Identity
+  (service accounts, roles, sessions) and the Ledger secret scanner hang off the org
+  alongside that hierarchy rather than inside it.
+id_conventions:
+  note: >-
+    Defakto publishes no id-prefix reference page. The prefixes below are read off real
+    identifier values printed in the OCSF audit-log examples and CLI/Terraform snippets in the
+    documentation, so each one is evidenced rather than inferred from the entity name.
+  prefixes:
+  - prefix: sak-
+    entity: ServiceAccountKey
+    evidence: 'spirlctl login --service-account-key-id sak-1234; terraform provider sa_key_id = "sak-abcd1234"'
+  - prefix: td-
+    entity: TrustDomain
+    evidence: 'OCSF audit event tag trust_domain_id = "td-kscgxiupol"'
+  - prefix: tdd-
+    entity: TrustDomainDeployment
+    evidence: 'OCSF audit event tag trust_domain_deployment_id = "tdd-0c9009b3ed"'
+  - prefix: c-
+    entity: Cluster
+    evidence: 'OCSF audit event tag cluster_id = "c-55zzfbmonu"'
+  - prefix: cv-
+    entity: ClusterVersion
+    evidence: 'OCSF audit event tag cluster_version_id = "cv-kwalu86v7w"'
+  unprefixed:
+  - entity: TrustDomainWorkload
+    identifier: spiffe_id
+    note: Workloads are identified by their SPIFFE ID URI, not by an opaque prefixed id.
+  - note: >-
+      Realm, User, ServiceAccount, Role, CICDProfile, Scanner and the remaining entities expose
+      an opaque `id` string with no prefix observed in any published example. No prefix is
+      asserted for them.
+entities:
+- name: Org
+  service: sessionapi
+  description: Top-level tenant. Every other object is scoped to an org.
+  relationships:
+  - has_many: User
+  - has_many: ServiceAccount
+  - has_many: TrustDomain
+  - has_many: Realm
+  - has_many: Cluster
+  - has_one: OrgSettings
+- name: TrustDomain
+  service: trustdomainapi
+  fields: 25
+  description: >-
+    The SPIFFE trust domain — the root of a credential-issuance boundary. Carries signing
+    authority status, JWT issuer configuration, and bundle rotation schedule.
+  relationships:
+  - belongs_to: Org
+    via: (org-scoped)
+  - has_many: TrustDomainKey
+    via: trust_domain_id
+  - has_many: TrustDomainDeployment
+    via: trust_domain_id
+  - has_many: Realm
+    via: trust_domain_id
+  - has_many: Cluster
+    via: trust_domain_id
+  - has_one: JwtIssuerConfig
+  - has_one: SigningAuthorityStatus
+    via: trust_domain_deployment_id
+- name: TrustDomainDeployment
+  service: trustdomainapi
+  description: A running deployment of Trust Domain Servers for a trust domain.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - belongs_to: Org
+    via: org_id
+  - has_many: SigningKey
+    via: key_id
+- name: TrustDomainKey
+  service: trustdomainapi
+  description: Signing key registered against a trust domain; enable/disable/delete lifecycle.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+- name: Realm
+  service: realmapi
+  description: >-
+    Optional hierarchical level inside a trust domain that scopes clusters and delegates
+    administration to a team. Used as a SPIFFE ID path prefix.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - belongs_to: Org
+    via: org_id
+  - has_many: Cluster
+    via: realm_id
+  - has_one: RealmComponents
+  - has_many: RealmDelegatedAdmins
+    via: realm_id
+- name: Cluster
+  service: clusterapi
+  fields: 21
+  description: >-
+    A registered compute environment (Kubernetes or VM) inside a trust domain. Holds the
+    deployment shape and links to the CI/CD profile and agent attestation config.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - belongs_to: Realm
+    via: realm_id
+    optional: true
+  - belongs_to: Org
+    via: org_id
+  - belongs_to: CICDProfile
+    via: ci_cd_profile_id
+    optional: true
+  - has_many: ClusterVersion
+    via: cluster_id
+  - has_many: Node
+    via: agent_id
+  - has_one: WorkloadCount
+- name: ClusterVersion
+  service: clusterapi
+  fields: 16
+  description: >-
+    A versioned, activatable configuration of a cluster. Versions are created, activated and
+    deactivated independently of the cluster itself.
+  relationships:
+  - belongs_to: Cluster
+    via: cluster_id
+  - belongs_to: AgentAttestationConfig
+    via: agent_attestation_config_id
+- name: Agent
+  service: statisticsapi
+  description: >-
+    A Defakto Agent process running alongside workloads, attesting them and delivering SVIDs.
+  relationships:
+  - belongs_to: Cluster
+    via: cluster_id
+  - belongs_to: Realm
+    via: realm_id
+- name: Server
+  service: statisticsapi
+  description: A Trust Domain Server instance reporting config status and health.
+  relationships:
+  - belongs_to: TrustDomainDeployment
+    confidence: medium
+- name: TrustDomainWorkload
+  service: workloadsapi
+  description: >-
+    A workload identified by its SPIFFE ID, with SVID-type and issuer-type breakdowns.
+    The leaf of the hierarchy and the thing the whole platform exists to identify.
+  relationships:
+  - identified_by: spiffe_id
+  - belongs_to: TrustDomain
+    confidence: high
+  - has_one: SvidTypeBreakdown
+  - has_one: IssuerTypeBreakdown
+- name: SVIDIssuedEvent
+  service: statisticsapi
+  fields: 19
+  description: >-
+    The issuance record — one per credential minted. Carries the SPIFFE ID, issuing agent,
+    issuer chain, key set, and JWT/X.509 attributes. This is the audit spine of the platform.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - belongs_to: Agent
+    via: agent_id
+  - references: spiffe_id
+  - references: issuer_id
+  - references: issuer_parent_id
+  - references: key_set_id
+  - has_one: JWTAttributes
+  - has_one: X509Attributes
+- name: HealthEvent
+  service: statisticsapi
+  fields: 14
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - belongs_to: Org
+    via: org_id
+  - references: source_id
+- name: ActivityFeedEntry
+  service: statisticsapi
+  description: >-
+    Unified activity feed. Polymorphic attributes: AuditLogAttributes,
+    FederationLinkPolledAttributes, WorkloadCredentialIssuedAttributes,
+    AgentAttestationAttributes, WorkloadCredentialErrorAttributes.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+- name: User
+  service: accessapi
+  relationships:
+  - belongs_to: Org
+  - has_many: RoleAssignment
+  - has_many: RealmRoleAssignment
+- name: UserInvitation
+  service: accessapi
+  relationships:
+  - belongs_to: Org
+- name: ServiceAccount
+  service: accessapi
+  description: Non-human identity for automation; holds a role and zero or more Ed25519 keys.
+  relationships:
+  - belongs_to: Org
+  - belongs_to: Role
+    via: role_id
+  - has_many: ServiceAccountKey
+    via: service_account_id
+  - has_one: CreatedBy
+  - has_many: RealmRoleAssignment
+    via: realm_id
+- name: ServiceAccountKey
+  service: accessapi
+  description: Ed25519 key pair used to sign session challenges. Multiple keys enable rotation.
+  relationships:
+  - belongs_to: ServiceAccount
+    via: service_account_id
+  - has_one: PKIXPublicKey
+- name: Role
+  service: accessapi
+  relationships:
+  - has_many: RoleAssignment
+- name: RealmRoleAssignment
+  service: accessapi
+  relationships:
+  - belongs_to: Realm
+    via: realm_id
+  - belongs_to: Role
+    via: role_id
+- name: CICDProfile
+  service: cicdapi
+  description: Maps a CI/CD system's identity to SPIFFE ID issuance rules.
+  relationships:
+  - has_many: CICDProfileLink
+    via: ci_cd_profile_id
+- name: CICDProfileLink
+  service: cicdapi
+  relationships:
+  - belongs_to: CICDProfile
+    via: ci_cd_profile_id
+  - belongs_to: Cluster
+    via: cluster_id
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+- name: LinkStatus
+  service: federationapi
+  description: A federation link between trust domains, with poll status and endpoint.
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - has_one: Endpoint
+  - has_one: PollStatus
+- name: DevIDPolicy
+  service: devidentityapi
+  description: Developer Identity policy — issues SVIDs to human developers.
+  relationships:
+  - belongs_to: DevOIDCConfig
+    via: dev_oidc_config_id
+  - has_one: ClaimsFilter
+- name: DevOIDCConfig
+  service: devidentityapi
+  relationships:
+  - has_one: PKIXPublicKey
+- name: Config
+  service: configapi
+  description: >-
+    Managed configuration, versioned and diffable. Scoped polymorphically via ConfigScope to
+    org, trust domain, trust domain deployment, or cluster.
+  relationships:
+  - scoped_by: OrgConfigRef | TrustDomainConfigRef | TrustDomainDeploymentConfigRef | ClusterConfigRef
+  - has_many: Section
+  - has_many: ConfigVersionSummary
+  - has_one: Actor
+- name: AlertConfig
+  service: alertapi
+  relationships:
+  - belongs_to: TrustDomain
+    via: trust_domain_id
+  - has_one: EmailConfig
+  - has_many: Alert
+    via: alert_config_id
+- name: Scanner
+  service: scannerapi
+  description: >-
+    Ledger secret scanner. SaaS or self-hosted, with per-provider connector configs for AWS,
+    Azure, GCP, Anthropic, OpenAI and Gemini EAP.
+  relationships:
+  - has_many: ScannerTarget
+    via: source_id
+  - has_one: ScannerConfiguration
+- name: ScannerTarget
+  service: scannerapi
+  description: A discovered secret-bearing target with a risk score.
+  relationships:
+  - belongs_to: Scanner
+    via: source_id
+- name: AgentAttestationConfig
+  service: agentattestationapi
+  description: >-
+    Attestation policy for agents. Backing config for the twelve documented agent attestation
+    methods (K8s SAT, AWS IID, AWS token, Azure IMDS/MSI, GCP IIT, TPM DevID, TPM EK, X.509
+    PoP, SSH PoP, HTTP DNS, custom JWT, extension webhook).
+  relationships:
+  - referenced_by: ClusterVersion
+    via: agent_attestation_config_id
+- name: ProviderAttestationConfig
+  service: providerattestationapi
+  relationships:
+  - has_one: AWSConfig
+counts:
+  services: 16
+  rpcs: 126
+  messages: 390
+  entity_messages_documented: 33

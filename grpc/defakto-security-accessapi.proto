@@ -1,0 +1,416 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/accessapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.access;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+enum RoleType {
+  ROLE_TYPE_UNSPECIFIED = 0;
+  ROLE_TYPE_REALM = 1;
+}
+
+message ListOrgRolesRequest {
+}
+
+message ListOrgRolesResponse {
+  repeated OrgRole roles = 1;
+}
+
+message RenewUserInvitationRequest {
+  // Required. The ID of the user invitation.
+  string id = 1;
+  // Optional. The duration of the invitation. If not set, a default duration is used.
+  google.protobuf.Duration ttl = 2;
+}
+
+message RenewUserInvitationResponse {
+  // The renewed invitation to the organization.
+  UserInvitation invitation = 1;
+}
+
+message CreateUserInvitationRequest {
+  // Required. The email address of the user.
+  string email = 1;
+  // Required. The ID of the role to assign the user to.
+  string role_id = 2;
+  // Optional. The duration of the invitation. If not set, a default duration is used.
+  google.protobuf.Duration ttl = 3;
+}
+
+message CreateUserInvitationResponse {
+  // The invitation to the organization.
+  UserInvitation invitation = 1;
+}
+
+message DeleteUserInvitationRequest {
+  // Required. The ID of the user invitation.
+  string id = 1;
+}
+
+message DeleteUserInvitationResponse {
+}
+
+message ListUserInvitationsRequest {
+}
+
+message ListUserInvitationsResponse {
+  // The user invitations.
+  repeated UserInvitation invitations = 1;
+}
+
+message ListUsersRequest {
+  // Optional. Filters the users list by the given email.
+  string by_email = 1;
+}
+
+message ListUsersResponse {
+  // The list of (optionally filtered) users.
+  repeated User users = 1;
+}
+
+message UpdateUserRoleRequest {
+  // Required. The ID of the organization user to update the role on.
+  string id = 1;
+  // Required. The ID of the role to apply.
+  string role_id = 2;
+}
+
+message UpdateUserRoleResponse {
+}
+
+message DeleteUserRequest {
+  // Required. The ID of the organization user to delete.
+  string id = 1;
+}
+
+message DeleteUserResponse {
+}
+
+message CreateServiceAccountRequest {
+  // Required. The name of the service account.
+  string name = 1;
+  // Optional. The description of the service account.
+  string description = 2;
+  // Optional. The role of the service account. The role must not have more permissions than the
+  // role of the authenticated user. If no role is given, the role of the authenticated user is
+  // used.
+  string role_id = 3;
+}
+
+message CreateServiceAccountResponse {
+  // Required. The created service account.
+  ServiceAccount service_account = 1;
+}
+
+message ListServiceAccountsRequest {
+  // Optional. The name of the service account to filter by.
+  string by_name = 1;
+}
+
+message ListServiceAccountsResponse {
+  // Optional. The list of service accounts.
+  repeated ServiceAccount service_accounts = 1;
+}
+
+message GetServiceAccountInfoRequest {
+  // Required. The id of the service account.
+  string id = 1;
+}
+
+message GetServiceAccountInfoResponse {
+  // Required. The service account.
+  ServiceAccount service_account = 1;
+  // Optional. The list of service account keys.
+  repeated ServiceAccountKey service_account_keys = 2;
+}
+
+message UpdateServiceAccountRoleRequest {
+  // Required. The id of the service account.
+  string id = 1;
+  // Required. The new role ID of the service account. The role must not have more permissions
+  // than the role of the authenticated user.
+  string role_id = 2;
+}
+
+message UpdateServiceAccountRoleResponse {
+  // Required. The updated service account.
+  ServiceAccount service_account = 1;
+}
+
+message DeleteServiceAccountRequest {
+  // Required. The id of the service account to be deleted.
+  string id = 1;
+  // Optional. If set to true, the service account will be deleted even if it has active keys.
+  bool force = 2;
+}
+
+message DeleteServiceAccountResponse {
+}
+
+message CreateServiceAccountKeyRequest {
+  // Required. The id of the service account the key should be added to.
+  string service_account_id = 1;
+}
+
+message CreateServiceAccountKeyResponse {
+  // Required. The created service account key.
+  ServiceAccountKey service_account_key = 1;
+}
+
+message DeleteServiceAccountKeyRequest {
+  // Required. The id of the service account key.
+  string id = 1;
+  // Optional. If set to true, the service account key will be deleted even if it is active.
+  bool force = 2;
+}
+
+message DeleteServiceAccountKeyResponse {
+}
+
+message UpdateServiceAccountKeyStatusRequest {
+  // Required. The id of the service account key.
+  string id = 1;
+  // Required. Flag indicating if the key should be active or not.
+  bool is_active = 2;
+}
+
+message UpdateServiceAccountKeyStatusResponse {
+  // Required. The updated service account key.
+  ServiceAccountKey service_account_key = 1;
+}
+
+message OrgRole {
+  // The ID of the organization role.
+  string id = 1;
+  // The name of the organization role.
+  string name = 2;
+}
+
+message User {
+  // The ID of the user.
+  string id = 1;
+  // The email of the user.
+  string email = 2;
+  // The role of the user in the organization.
+  OrgRole role = 3;
+  // The name of the user.
+  string name = 4;
+  // SSO provider of the user.
+  string sso_provider = 5;
+}
+
+message UserInvitation {
+  // The ID of the user invitation.
+  string id = 1;
+  // The email of the user being invited.
+  string email = 2;
+  // The role to give the invited user.
+  OrgRole role = 3;
+  // The code used to accept the invitation during login.
+  string code = 4;
+  // When the invitation was created.
+  google.protobuf.Timestamp created_at = 5;
+  // When the invitation expires.
+  google.protobuf.Timestamp expires_at = 6;
+  // The user who created the invitation.
+  string created_by = 7;
+  // The URL used to accept the invitation if using web login.
+  string url = 8;
+}
+
+message ServiceAccountKey {
+  // The id of the service account key.
+  string id = 1;
+  // The id of the service account the key belongs to.
+  string service_account_id = 2;
+  // Flag indicating if the key is active and can be used for authenticating.
+  bool is_active = 3;
+  // The public key of the service account key.
+  PKIXPublicKey public_key = 4;
+  // The creation time of the service account key.
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message ServiceAccount {
+  // The id of the service account.
+  string id = 1;
+  // The name of the service account.
+  string name = 2;
+  // The description of the service account.
+  string description = 3;
+  // The role of the service account.
+  string role_id = 4;
+  // The creation time of the service account.
+  google.protobuf.Timestamp created_at = 5;
+  // The user who created the service account.
+  CreatedBy created_by = 6;
+}
+
+message CreatedBy {
+  // The id of the user who created the resource.
+  string id = 1;
+  // The email of the user who created the resource.
+  string email = 2;
+}
+
+message PKIXPublicKey {
+  // The key bytes in PKIX, ASN.1 DER form.
+  bytes data = 1;
+}
+
+message UpdateOrgSettingsRequest {
+  // Whether Assume Org is enabled for the organization.
+  bool assume_org_enabled = 1;
+  // The expiration time for Assume Org functionality. If not set, Assume Org is enabled
+  // indefinitely if assume_org_enabled=true.
+  google.protobuf.Timestamp assume_org_expiration_time = 2;
+}
+
+message UpdateOrgSettingsResponse {
+  // The updated organization settings.
+  OrgSettings org_settings = 1;
+}
+
+message GetOrgSettingsRequest {
+}
+
+message GetOrgSettingsResponse {
+  // The organization settings.
+  OrgSettings org_settings = 1;
+}
+
+message OrgSettings {
+  // When the settings were created.
+  google.protobuf.Timestamp created_at = 1;
+  // When the settings were last updated.
+  google.protobuf.Timestamp updated_at = 2;
+  // Whether Assume Org is enabled for the organization.
+  bool assume_org_enabled = 3;
+  // The expiration time for Assume Org functionality. If not set, Assume Org is enabled
+  // indefinitely if assume_org_enabled=true.
+  google.protobuf.Timestamp assume_org_expiration_time = 4;
+}
+
+message AssignRoleAssignmentRequest {
+}
+
+message AssignRoleAssignmentResponse {
+  // The ID of the created role assignment.
+  string assignment_id = 1;
+  // The timestamp when the role assignment was created.
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message RemoveRoleAssignmentRequest {
+  // Required. The ID of the role assignment to remove.
+  string assignment_id = 1;
+}
+
+message RemoveRoleAssignmentResponse {
+}
+
+message ListRoleAssignmentsRequest {
+}
+
+message ListRoleAssignmentsResponse {
+  // The list of role assignments.
+  repeated RoleAssignment assignments = 1;
+}
+
+message RealmRoleAssignment {
+  // Required. The realm ID.
+  string realm_id = 1;
+  // Required. The realm role ID (rr-* format).
+  string role_id = 2;
+}
+
+message RoleAssignment {
+  // The assignment ID.
+  string id = 1;
+  // When the assignment was created.
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message ListRolesRequest {
+  // Required. The type of roles to list.
+  RoleType role_type = 1;
+}
+
+message ListRolesResponse {
+  // The list of roles.
+  repeated Role roles = 1;
+}
+
+message Role {
+  // The role ID.
+  string id = 1;
+  // The role name.
+  string name = 2;
+}
+
+message ListDelegatedAdminsRequest {
+  // Optional. Filter by realm IDs. If empty, lists delegated admins for all realms in the
+  // organization that the caller is allowed to see.
+  repeated string realm_ids = 1;
+}
+
+message ListDelegatedAdminsResponse {
+  // The delegated admins grouped by realm.
+  repeated RealmDelegatedAdmins realms = 1;
+}
+
+message RealmDelegatedAdmins {
+  // The ID of the realm.
+  string realm_id = 1;
+  // The delegated admins for this realm.
+  repeated DelegatedAdmin delegated_admins = 2;
+}
+
+message DelegatedAdmin {
+  // The role assignment ID that makes this principal a delegated admin.
+  string assignment_id = 1;
+  // When the delegated admin role assignment was created.
+  google.protobuf.Timestamp created_at = 4;
+}
+
+service API {
+  rpc ListOrgRoles(ListOrgRolesRequest) returns (ListOrgRolesResponse);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc UpdateUserRole(UpdateUserRoleRequest) returns (UpdateUserRoleResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc CreateUserInvitation(CreateUserInvitationRequest) returns (CreateUserInvitationResponse);
+  rpc RenewUserInvitation(RenewUserInvitationRequest) returns (RenewUserInvitationResponse);
+  rpc DeleteUserInvitation(DeleteUserInvitationRequest) returns (DeleteUserInvitationResponse);
+  rpc ListUserInvitations(ListUserInvitationsRequest) returns (ListUserInvitationsResponse);
+  rpc CreateServiceAccount(CreateServiceAccountRequest) returns (CreateServiceAccountResponse);
+  rpc ListServiceAccounts(ListServiceAccountsRequest) returns (ListServiceAccountsResponse);
+  rpc GetServiceAccountInfo(GetServiceAccountInfoRequest) returns (GetServiceAccountInfoResponse);
+  rpc UpdateServiceAccountRole(UpdateServiceAccountRoleRequest) returns (UpdateServiceAccountRoleResponse);
+  rpc DeleteServiceAccount(DeleteServiceAccountRequest) returns (DeleteServiceAccountResponse);
+  rpc CreateServiceAccountKey(CreateServiceAccountKeyRequest) returns (CreateServiceAccountKeyResponse);
+  rpc DeleteServiceAccountKey(DeleteServiceAccountKeyRequest) returns (DeleteServiceAccountKeyResponse);
+  rpc UpdateServiceAccountKeyStatus(UpdateServiceAccountKeyStatusRequest) returns (UpdateServiceAccountKeyStatusResponse);
+  rpc UpdateOrgSettings(UpdateOrgSettingsRequest) returns (UpdateOrgSettingsResponse);
+  rpc GetOrgSettings(GetOrgSettingsRequest) returns (GetOrgSettingsResponse);
+  rpc AssignRoleAssignment(AssignRoleAssignmentRequest) returns (AssignRoleAssignmentResponse);
+  rpc RemoveRoleAssignment(RemoveRoleAssignmentRequest) returns (RemoveRoleAssignmentResponse);
+  rpc ListRoleAssignments(ListRoleAssignmentsRequest) returns (ListRoleAssignmentsResponse);
+  rpc ListDelegatedAdmins(ListDelegatedAdminsRequest) returns (ListDelegatedAdminsResponse);
+}

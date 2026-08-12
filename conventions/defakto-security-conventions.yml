@@ -1,0 +1,150 @@
+generated: '2026-08-12'
+method: derived
+source: grpc/*.proto
+also_searched:
+- https://d.defakto.security/cli/spirlctl/overview.md
+- https://d.defakto.security/mint/install/endpoints.md
+- https://d.defakto.security/releases/end-of-life.md
+note: >-
+  Cross-cutting runtime semantics for the Defakto Management API. Derived from the
+  reconstructed protobuf contract in grpc/ plus the published documentation. Defakto ships no
+  narrative "API conventions" page — everything below is read off the wire contract itself,
+  which is why the pagination and filtering sections are precise and the idempotency and
+  rate-limit sections are honestly empty.
+transport:
+  protocol: gRPC
+  http_version: HTTP/2
+  tls: required
+  port: 443
+  content_type: application/grpc
+  rest_surface: false
+  rest_surface_note: >-
+    There is no REST/JSON gateway. api.defakto.security answers 415 application/grpc to any
+    non-gRPC request, including /openapi.json. An HTTP client cannot call this API at all.
+versioning:
+  style: package-path
+  current: v1
+  evidence: 'Every service is packaged com.spirl.api.v1.<domain>; proto sources are api/v1/<domain>/api.proto.'
+  breaking_change_policy: >-
+    Not stated for the API package itself. The component EOL policy (18 months per minor,
+    backward compatible within a major) governs the server/agent binaries, not the wire
+    contract. See lifecycle/defakto-security-lifecycle.yml.
+  sdk_forward_compat: >-
+    The Go SDK treats an unrecognised response field or type as ErrOutOfDate rather than
+    ignoring it, so servers adding fields surface as an explicit "upgrade your SDK" signal.
+pagination:
+  style: cursor
+  documented: contract
+  request_fields:
+  - name: page_size
+    type: uint32
+    required: true
+    constraint: 1-1000
+  - name: page_token
+    type: string
+    required: false
+    description: Opaque cursor from the previous response.
+  response_fields:
+  - name: next_page_token
+    type: string
+    description: Empty string indicates the final page.
+  note: >-
+    Not universal. The paginated shape is used where result sets are unbounded (workloads,
+    statistics, activity feed); collection reads over bounded control-plane objects
+    (ListTrustDomains, ListRealms, ListClusters) return the full list with no page token.
+filtering:
+  style: structured-field-filters
+  shared_package: com.spirl.api.v1.listing
+  request_field: query_filters (repeated FieldFilter)
+  combination: AND
+  operators:
+  - FILTER_OPERATOR_EQUAL
+  - FILTER_OPERATOR_NOT_EQUAL
+  - FILTER_OPERATOR_PREFIX
+  - FILTER_OPERATOR_CONTAINS
+  - FILTER_OPERATOR_GREATER_THAN_OR_EQUAL
+  - FILTER_OPERATOR_LESS_THAN_OR_EQUAL
+  value_encoding:
+    note: >-
+      Values are always strings regardless of the underlying column type; the server parses
+      per-field. Unparseable values yield INVALID_ARGUMENT with a field detail.
+    string: literal value
+    integer: decimal representation, e.g. "42"
+    boolean: '"true" or "false"'
+    enum: proto enum value name, e.g. "KUBERNETES_WORKLOAD_TYPE_DEPLOYMENT", or its decimal int32
+    timestamp: RFC 3339, e.g. "2025-01-02T15:04:05Z"
+  caveat: >-
+    Two incompatible FieldFilter definitions coexist. The shared listing package keys `field`
+    as an int32 enum ordinal; the workloads package defines its own FieldFilter keying `field`
+    as a string, with a different operator set. A client cannot use one filter type against
+    both surfaces.
+sorting:
+  request_field: FieldSort
+  orders:
+  - SORT_ORDER_ASC
+  - SORT_ORDER_DESC
+  field_encoding: int32 value of the entity-specific SortField enum; UNSPECIFIED (0) is rejected.
+field_expansion:
+  style: boolean-include-flags
+  note: >-
+    Instead of a generic `expand` parameter, individual requests carry named booleans that
+    switch on additional work. Real examples from the contract.
+  examples:
+  - field: include_dynamic_data
+    on: ListRealmsRequest
+    effect: >-
+      When true, joins live event-derived cluster/workload/agent statistics onto the response;
+      when false or unset only control-plane database rows are returned.
+  - field: include_summary
+    on: ListTrustDomainWorkloadsRequest
+    effect: Populates TrustDomainWorkloadsSummary with totals across all matching rows, not just the page.
+  - field: breakdowns
+    on: ListTrustDomainWorkloadsRequest
+    effect: Repeated BreakdownDimension enum selecting SVID_TYPE and/or ISSUER_TYPE rollups.
+idempotency:
+  supported: false
+  header: null
+  evidence: >-
+    No idempotency key, request-ID-for-replay, or client-token field appears on any of the 126
+    RPCs, and no idempotency guidance appears anywhere in the documentation site index. Create
+    operations (CreateTrustDomain, CreateRealm, CreateCluster, CreateTrustDomainKey) carry no
+    deduplication token, so a retried create after an ambiguous failure is not protected.
+  note: >-
+    Recorded as an explicit negative. No `Idempotency` pointer is emitted in apis.yml, because
+    the provider does not implement it — the pointer would be false credit.
+request_tracing:
+  field: request_id
+  where: AuditLogAttributes (statisticsapi)
+  note: >-
+    A request_id is carried on audit-log activity entries, and the OCSF audit stream groups
+    logs by spanid and traceid. There is no documented client-supplied correlation header on
+    the request path — tracing is server-emitted and read back through the activity feed,
+    not injected by the caller.
+  log_grouping_docs: https://d.defakto.security/mint/operations/spirl-telemetry-log-grouping.md
+sdk_identification:
+  note: >-
+    Since spirl-sdk-go v0.3.5 the SDK sends its name and version on outgoing requests,
+    defaulting to `sdk` with no version. Client metadata is set in spirlsdk/client/client_metadata.go.
+error_envelope:
+  shape: google.rpc.Status (gRPC code + message + details)
+  rfc9457: false
+  detail: errors/defakto-security-problem-types.yml
+rate_limit_signaling:
+  documented: false
+  headers: []
+  exhaustion_code: RESOURCE_EXHAUSTED
+  note: >-
+    RESOURCE_EXHAUSTED is the gRPC code that would signal throttling and it is present in the
+    SDK's status switch, but it is unmapped and no limits, quotas or retry guidance are
+    published. See rate-limits/defakto-security-rate-limits.yml.
+observability:
+  metrics: Prometheus endpoints on both Agent and Trust Domain Server
+  audit: OCSF 1.8.0 events, NDJSON to stdout, opt-in
+  dashboards: Official Grafana dashboard templates (github.com/spirl/dashboard-templates)
+  detail: asyncapi/defakto-security-audit-events.yml
+cross_links:
+  authentication: authentication/defakto-security-authentication.yml
+  errors: errors/defakto-security-problem-types.yml
+  lifecycle: lifecycle/defakto-security-lifecycle.yml
+  rate_limits: rate-limits/defakto-security-rate-limits.yml
+  data_model: data-model/defakto-security-data-model.yml

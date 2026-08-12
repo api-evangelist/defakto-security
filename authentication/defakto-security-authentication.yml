@@ -1,0 +1,156 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/iam/service-accounts.md
+docs:
+- https://d.defakto.security/iam/service-accounts.md
+- https://d.defakto.security/iam/roles.md
+- https://d.defakto.security/iam/wif-issuers.md
+- https://d.defakto.security/iam/enterprise-sso.md
+- https://d.defakto.security/cli/spirlctl/login-logout.md
+- https://d.defakto.security/mint/configuration/token-exchange.md
+note: >-
+  Defakto is an identity company, and its own API reflects that: there is no API key anywhere
+  in the product. Every caller — human or machine — authenticates into a short-lived session,
+  and the two machine paths are an Ed25519 challenge-signing key pair or Workload Identity
+  Federation against an external OIDC issuer, which stores no long-lived secret at all.
+  Authorization is role-based (five hierarchical org roles plus one realm-scoped role), not
+  OAuth-scope-based, so there is no scopes/ artifact for this provider — the roles table is
+  the permission surface. Derived from the Go SDK's auth packages
+  (spirlsdk/auth/{oauth2,serviceaccount}) and the published IAM documentation.
+transport:
+  protocol: gRPC over HTTP/2
+  tls: required
+  port: 443
+  hosts:
+  - https://api.defakto.security
+  - https://api.spirl.com
+schemes:
+- id: service-account-key
+  type: signature
+  algorithm: Ed25519
+  applies_to: machine
+  description: >-
+    A service account holds one or more Ed25519 public/private key pairs. The caller keeps
+    the private key and uses it to sign an authentication challenge from the control plane;
+    a session is returned in exchange. The private key is never transmitted.
+  credentials:
+    key_id_prefix: sak-
+    private_key_format: PEM
+  rotation: >-
+    Multiple keys per service account are explicitly supported to enable zero-downtime
+    rotation — deploy and verify the new key, then disable and delete the previous one.
+  sdk_package: spirlsdk/auth/serviceaccount
+  cli: 'spirlctl login --service-account-key-id sak-<id> --private-key-file <path>'
+  docs: https://d.defakto.security/iam/service-accounts.md
+- id: workload-identity-federation
+  type: oidc-token-exchange
+  applies_to: machine
+  description: >-
+    A WIF Configuration binds a service account to an external OIDC identity provider and
+    declares which JWT claims must match. A pipeline presents a short-lived platform-issued
+    OIDC token (Terraform Cloud, GitHub Actions, GitLab, Jenkins) and receives a standard
+    service account session with that account's role and realm assignments. No long-lived
+    secret is stored anywhere.
+  requires:
+    wif_issuer: >-
+      An organization-wide record registering the external OIDC provider and holding its key
+      material. Created by org administrators or owners; any org member may create a WIF
+      Configuration on a service account they own referencing an existing issuer.
+  auditing: >-
+    WIF sessions are recorded in audit logs with the OIDC issuer, the matched claims, and the
+    session ID; subsequent calls in the session carry the same session ID, so all activity
+    traces back to the originating token exchange.
+  docs: https://d.defakto.security/iam/wif-issuers.md
+- id: interactive-oauth
+  type: oauth2
+  applies_to: human
+  description: >-
+    Browser-based OAuth login used by spirlctl and the web console. Default IdP is Google;
+    organizations can be selected explicitly with --org. A headless device-style flow is
+    available for SSH sessions and CI by printing a URL and accepting a pasted code.
+  session_storage: ~/.spirl/config.json
+  sdk_package: spirlsdk/auth/oauth2
+  cli_variants:
+  - spirlctl login
+  - spirlctl login --org <org>
+  - spirlctl login --hint <email>
+  - spirlctl login --headless
+  - spirlctl whoami
+  - spirlctl logout
+  docs: https://d.defakto.security/cli/spirlctl/login-logout.md
+- id: enterprise-sso
+  type: openIdConnect
+  applies_to: human
+  description: OIDC-based single sign-on for organizations, configured per org.
+  docs: https://d.defakto.security/iam/enterprise-sso.md
+- id: none
+  type: none
+  applies_to: internal
+  description: >-
+    The SDK ships an explicit no-auth transport (spirlsdk/auth/none.go) for unauthenticated
+    calls. Present in the client library; not a public access path.
+  sdk_package: spirlsdk/auth/none
+issued_credentials:
+  note: >-
+    Distinct from authenticating TO Defakto: these are what the platform MINTS for customer
+    workloads. They are the product, and they are what a workload subsequently presents to
+    AWS, Azure, GCP, OpenAI or Anthropic.
+  types:
+  - id: x509-svid
+    standard: SPIFFE X.509-SVID
+    description: X.509 certificate bound to a SPIFFE ID; used for mTLS between workloads.
+  - id: jwt-svid
+    standard: SPIFFE JWT-SVID
+    description: >-
+      Signed JWT bound to a SPIFFE ID with a configurable audience; the credential exchanged
+      for AWS/Azure/GCP/OpenAI/Anthropic access via workload identity federation.
+  - id: wit-svid
+    standard: Workload Identity Token (WIT)
+    description: >-
+      Proof-of-possession bound workload token. Requires its own signing key to be enabled
+      and provisioned before use.
+    docs: https://d.defakto.security/mint/configuration/svid-issuance/wit-svid.md
+token_exchange:
+  endpoint: /oauth/token
+  served_by: Trust Domain Server (customer-deployed; no single public host)
+  description: >-
+    Exchanges a credential a workload already holds for a different one. Two documented
+    flows: delegation (exchange a user's token for a delegated JWT-SVID) and OAuth access
+    tokens (exchange a JWT-SVID for an OAuth access token). The OAuth issuer is configurable
+    per trust domain via --oauth-issuer / --builtin-oauth-issuer as of spirlctl 0.35.0.
+  docs: https://d.defakto.security/mint/configuration/token-exchange.md
+authorization:
+  model: rbac
+  scope_model: none
+  note: >-
+    No OAuth scopes. Permissions are attached to hierarchical roles, each inheriting the
+    previous. A realm-scoped role layers on top of an organization role.
+  org_roles:
+  - name: Auditor
+    rank: 1
+    summary: Read-only across users, trust domains, clusters, realms, federation, config.
+  - name: Operator
+    rank: 2
+    summary: Auditor plus create/modify clusters, cluster versions, CI/CD profiles, refresh federation links, update cluster config.
+  - name: Manager
+    rank: 3
+    summary: Operator plus trust domain key lifecycle and deployment key set management.
+  - name: Administrator
+    rank: 4
+    summary: Manager plus trust domain create/register/update/delete, realm lifecycle, role assignment, WIF issuer lifecycle, developer identity policy, org/trust-domain config.
+  - name: Owner
+    rank: 5
+    summary: Administrator plus user invitation, role change and user deletion.
+  realm_roles:
+  - name: Realm Admin
+    scope: realm
+    summary: >-
+      Delegated cluster CRUD and cluster-version registration within assigned realms only.
+      Cannot reach other realms, create or delete realms, modify realm role assignments, or
+      elevate its own privileges. Always layered on an existing org role.
+  constraints:
+  - Service accounts cannot hold the Owner role.
+  - Users can only create service accounts with a role equal to or lower than their own.
+  - Service accounts cannot create service accounts.
+  - Non-admin roles can update or delete only service accounts they created.
+  docs: https://d.defakto.security/iam/roles.md

@@ -1,0 +1,132 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/releases/end-of-life.md
+docs:
+- https://d.defakto.security/releases.md
+- https://d.defakto.security/releases/end-of-life.md
+- https://d.defakto.security/releases/compatibility-matrix.md
+note: >-
+  Defakto's lifecycle discipline is the strongest thing in this profile after the contract
+  itself. It publishes a numeric support window, a per-version EOL date table for every
+  shipped component, a validated agent/server compatibility matrix with an explicit statement
+  that a blank cell means "not tested" rather than "incompatible", and dated release notes per
+  component. What it does NOT have is a status page — there is no status.defakto.security or
+  status.spirl.com in DNS — so no StatusPage pointer is emitted.
+versioning:
+  scheme: semver
+  api_version: v1
+  api_version_style: proto package path (com.spirl.api.v1.*)
+  component_versioning: >-
+    Each shipped component versions independently: spirl-server (trust domain server),
+    spirl-system (agent-side), spirlctl, spirldbg, spirl-perf, spirl-sync, spirl-sdk-go,
+    terraform-provider.
+deprecation_policy:
+  published: true
+  url: https://d.defakto.security/releases/end-of-life.md
+  support_window: 18 months from each minor version's release date
+  patch_policy: >-
+    Patch releases supersede all prior patches in the same minor immediately on release; only
+    the latest patch of a minor is supported. Patches are cumulative, non-breaking, and safe
+    to apply without configuration changes.
+  minor_policy: >-
+    Every minor is designed backward-compatible within the same major. Direct upgrades
+    spanning up to 3 minor versions are formally validated (e.g. 0.27.0 to 0.30.0); larger
+    jumps are expected to work and any breakage is treated as a bug.
+  runtime_signalling:
+    sunset_header: false
+    deprecation_header: false
+    note: Policy is documentation-only; no RFC 8594 headers are documented on any response.
+  caveat: >-
+    The page itself carries the disclaimer "This page is updated periodically and may not
+    reflect the latest information."
+current_versions:
+  as_of: '2026-08-12'
+  trust_domain_server:
+    version: 0.38.0
+    released: '2026-07-24'
+    eol: '2028-01-24'
+  agent:
+    version: 0.43.0
+    released: '2026-07-24'
+    eol: '2028-01-24'
+  cli:
+    name: spirlctl
+    version: 0.35.0
+    released: '2026-07-29'
+  go_sdk:
+    version: v0.3.6
+    released: '2026-06-11'
+  terraform_provider:
+    version: v0.13.1
+    released: '2026-08-07'
+eol_schedule:
+  component: spirl-server (trust domain server)
+  entries:
+  - {version: 0.38.0, released: '2026-07-24', eol: '2028-01-24'}
+  - {version: 0.37.0, released: '2026-07-10', eol: '2028-01-10'}
+  - {version: 0.36.1, released: '2026-05-27', eol: '2027-11-27'}
+  - {version: 0.36.0, released: '2026-05-22', eol: superseded by 0.36.1}
+  - {version: 0.35.0, released: '2026-05-18', eol: '2027-11-18'}
+  - {version: 0.34.0, released: '2026-05-13', eol: '2027-11-13'}
+  - {version: 0.33.0, released: '2026-05-01', eol: '2027-11-01'}
+  - {version: 0.32.1, released: '2026-04-15', eol: '2027-10-15'}
+  - {version: 0.31.0, released: '2026-03-10', eol: '2027-09-10'}
+  - {version: 0.30.0, released: '2026-02-12', eol: '2027-08-12'}
+  - {version: 0.29.0, released: '2026-01-21', eol: '2027-07-21'}
+  - {version: 0.28.0, released: '2026-01-09', eol: '2027-07-09'}
+  - {version: 0.27.1, released: '2025-12-10', eol: '2027-06-10'}
+  - {version: 0.26.0, released: '2025-11-27', eol: '2027-05-27'}
+  - {version: 0.25.0, released: '2025-11-05', eol: '2027-05-05'}
+  - {version: 0.24.0, released: '2025-10-08', eol: '2027-04-08'}
+  - {version: 0.23.0, released: '2025-09-09', eol: '2027-03-09'}
+  - {version: 0.22.5, released: '2025-08-06', eol: '2027-02-06'}
+  - {version: 0.21.0, released: '2025-06-10', eol: '2026-12-10'}
+  - {version: 0.20.0, released: '2025-05-22', eol: '2026-11-22'}
+compatibility_matrix:
+  published: true
+  url: https://d.defakto.security/releases/compatibility-matrix.md
+  last_updated: '2026-08-06'
+  semantics: >-
+    Each cell marks an agent/trust-domain-server pair validated together against a promoted
+    release. A blank cell means "not tested", explicitly not "incompatible" — Defakto states
+    it records only measured pairs and never infers compatibility for untested pairs or
+    version ranges. That is an unusually honest matrix.
+status_page:
+  published: false
+  probed:
+  - url: https://status.defakto.security/
+    result: NXDOMAIN
+  - url: https://status.spirl.com/
+    result: NXDOMAIN
+  note: >-
+    No public status page or uptime history. For a control plane that gates credential
+    issuance across a customer's whole estate, this is the most consequential operational gap
+    in the profile. No StatusPage pointer emitted.
+sla:
+  published: false
+  note: No SLA or uptime commitment is published on any public page.
+deprecated_surfaces:
+- surface: api.spirl.com / app.spirl.com / auth.api.spirl.com
+  state: legacy-but-live
+  evidence: >-
+    Listed in the published network-requirements allowlist as "Management API (legacy
+    app.spirl.com console)" and "Authentication for the spirlctl CLI and legacy web UI"
+    alongside the current api.defakto.security hosts. Both answer on 443 today.
+  sunset_date: null
+  note: >-
+    Labelled legacy but given no announced retirement date, and the spirlctl CLI still
+    authenticates against auth.api.spirl.com rather than the defakto.security equivalent.
+    A dated sunset would close this.
+- surface: SPIRL brand naming inside the product
+  state: partial-migration
+  evidence: >-
+    Component and binary names remain SPIRL-prefixed after the rebrand — spirlctl, spirldbg,
+    spirl-server, spirl-system, spirl-sync, spirl-perf, spirl-sdk-go, SPIRL Bridge, SPIRL
+    Reflector — and the Homebrew formula still lists homepage "https://www.spirl.com/". The
+    Go module path is still github.com/spirl/spirl-sdk-go and the proto package is still
+    com.spirl.api.v1.*, so the rename cannot be completed without a breaking change.
+preview_features:
+- name: Downtime Protection (SPIRL Reflector)
+  state: private preview
+  evidence: 'Documented with the notice "This feature is in private preview and is not publicly available."'
+  docs: https://d.defakto.security/mint/reflector.md

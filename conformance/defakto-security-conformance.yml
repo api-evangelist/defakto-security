@@ -1,0 +1,160 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/
+note: >-
+  Defakto's whole product is an implementation of open identity standards, so its standards
+  conformance is unusually strong and unusually specific — and it stands in sharp contrast to
+  its API-practice conformance, which is thin. Two different pictures in one table:
+  the identity standards it implements are named, versioned and documented; the cross-cutting
+  API conventions (RFC 9457 problem details, RateLimit headers, RFC 8594 Sunset/Deprecation
+  headers, idempotency) are all absent. Compliance certifications are the notable gap — no
+  SOC 2, ISO 27001, FedRAMP or PCI attestation is published anywhere on the site, which for a
+  security vendor selling into enterprise identity is a conspicuous omission. No `Compliance`
+  pointer is emitted in apis.yml for exactly that reason.
+standards:
+- id: spiffe
+  name: SPIFFE (Secure Production Identity Framework for Everyone)
+  conforms: true
+  evidence: >-
+    The platform's core function. Issues SPIFFE X.509-SVIDs and JWT-SVIDs, runs SPIFFE Trust
+    Domain Servers and Agents, and exposes the standard SPIFFE Workload API over a Unix domain
+    socket. Co-founder Eli Nesterov led one of the largest SPIFFE deployments in production.
+  docs: https://d.defakto.security/mint/concepts/defakto-workload-identity.md
+- id: spiffe-workload-api
+  name: SPIFFE Workload API (gRPC over UDS)
+  conforms: true
+  evidence: >-
+    Agents expose the standard SPIFFE Workload API for credential retrieval; the
+    defakto-security/setup-spiffe GitHub Action and the spiffecli tool both speak it.
+  docs: https://github.com/defakto-security/setup-spiffe
+- id: spiffe-federation
+  name: SPIFFE Federation / trust bundle endpoint
+  conforms: true
+  evidence: >-
+    Federation links between trust domains with a documented HTTPS Web PKI profile
+    (HTTPSWebProfile in the federation contract); bundle and OIDC metadata hosted at
+    fed.spirl.org.
+  docs: https://d.defakto.security/mint/install/endpoints.md
+- id: x509
+  name: X.509 / PKIX
+  conforms: true
+  evidence: >-
+    X.509-SVID issuance with configurable certificate fields and extensions, upstream CA
+    chaining to AWS Private CA, GCP Certificate Authority Service, or an extension webhook.
+  docs: https://d.defakto.security/mint/configuration/svid-issuance/x509-svid-customization.md
+- id: jwt
+  name: JSON Web Token (RFC 7519)
+  conforms: true
+  evidence: JWT-SVID issuance with configurable claims and audience values.
+  docs: https://d.defakto.security/mint/configuration/svid-issuance/jwt-svid-customization.md
+- id: oidc
+  name: OpenID Connect
+  conforms: true
+  evidence: >-
+    Three distinct OIDC roles. As RELYING PARTY for enterprise SSO and for Workload Identity
+    Federation issuers (Terraform Cloud, GitHub Actions, GitLab, Jenkins). As OIDC PROVIDER
+    publishing discovery metadata and JWKS for JWT-SVIDs so AWS, Azure and GCP can federate
+    against a trust domain. As VERIFIER when attesting agents via cloud-provider OIDC
+    discovery endpoints.
+  docs: https://d.defakto.security/iam/wif-issuers.md
+- id: oauth2
+  name: OAuth 2.0
+  conforms: true
+  evidence: >-
+    Browser OAuth login for spirlctl and console; a configurable OAuth access-token issuer per
+    trust domain (--oauth-issuer / --builtin-oauth-issuer, spirlctl 0.35.0).
+  docs: https://d.defakto.security/cli/spirlctl/login-logout.md
+- id: rfc8693
+  name: OAuth 2.0 Token Exchange (RFC 8693)
+  conforms: true
+  confidence: high
+  evidence: >-
+    The Trust Domain Server exposes an /oauth/token endpoint that exchanges a held credential
+    for a different one — delegation (user token to delegated JWT-SVID) and JWT-SVID to OAuth
+    access token. Defakto describes the mechanism and endpoint but does not cite the RFC
+    number, so the standard attribution is ours, not theirs.
+  docs: https://d.defakto.security/mint/configuration/token-exchange.md
+- id: wimse
+  name: IETF WIMSE / Workload Identity Token (WIT)
+  conforms: partial
+  evidence: >-
+    Ships WIT-SVID, a proof-of-possession bound workload token, and Defakto engineers publish
+    on IETF workload-identity work (IETF 122 takeaways). The IETF work is in progress, so this
+    is implementation-of-a-draft, not conformance to a ratified standard.
+  docs: https://d.defakto.security/mint/configuration/svid-issuance/wit-svid.md
+- id: ocsf
+  name: Open Cybersecurity Schema Framework 1.8.0
+  conforms: true
+  evidence: >-
+    Audit events are emitted as plain OCSF 1.8.0 with, in Defakto's own words, "no proprietary
+    or non-standard fields added, so they pass strict OCSF validation as-is". Two classes:
+    Authentication (class_uid 3002) and Entity Management (class_uid 3004).
+  docs: https://d.defakto.security/mint/configuration/telemetry/spirl-telemetry-audit-logging.md
+- id: grpc
+  name: gRPC / HTTP-2
+  conforms: true
+  evidence: 16 services, 126 RPCs, protobuf3 over HTTP/2 TLS on 443.
+  docs: grpc/
+- id: protobuf
+  name: Protocol Buffers 3
+  conforms: true
+  evidence: >-
+    All 390 message types are proto3. Uses buf.build/gen/go/bufbuild/protovalidate, so the
+    contract carries declarative field validation.
+- id: prometheus
+  name: Prometheus exposition format
+  conforms: true
+  evidence: Agent and Trust Domain Server both expose Prometheus-compatible metrics endpoints.
+  docs: https://d.defakto.security/mint/operations/server-metrics.md
+- id: tpm
+  name: TCG TPM 2.0 (DevID / Endorsement Key)
+  conforms: true
+  evidence: Agent attestation via TPM DevID certificates and TPM Endorsement Keys.
+  docs: https://d.defakto.security/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-tpm-devid.md
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: >-
+    Not applicable and not implemented — the API is gRPC, so errors are google.rpc.Status.
+    Recorded so the absence is not read as an unchecked box.
+- id: ratelimit-headers
+  name: IETF RateLimit header fields
+  conforms: false
+  evidence: No rate limits are published and no RateLimit/Retry-After signalling is documented.
+- id: rfc8594
+  name: RFC 8594 Sunset header / Deprecation header
+  conforms: false
+  evidence: >-
+    Defakto publishes a real, dated 18-month EOL policy per component version, but it is a
+    documentation table, not a runtime header. No Sunset or Deprecation header is documented
+    on any response.
+- id: idempotency
+  name: Idempotency keys
+  conforms: false
+  evidence: No idempotency token on any of the 126 RPCs. See conventions/.
+- id: rfc9116
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: >-
+    /.well-known/security.txt returns 404 on every host, even though the company publishes a
+    responsible-disclosure address at https://www.defakto.security/security/. A four-line
+    security.txt would close this.
+compliance_certifications:
+  published: []
+  searched:
+  - https://www.defakto.security/security/
+  - https://www.defakto.security/
+  - https://d.defakto.security/
+  probed:
+  - url: https://trust.defakto.security/
+    status: null
+    note: DNS does not resolve
+  - url: https://www.defakto.security/trust
+    status: 404
+  note: >-
+    No SOC 2, ISO 27001, PCI DSS, HIPAA, FedRAMP or GDPR attestation is published on any
+    public page. The security page describes internal practices (hardware-backed security
+    keys, keyless authentication, code audits, threat monitoring, production alerting) and
+    names one analyst recognition (Gartner Cool Vendor in Identity-First Security, 2025), but
+    no third-party audit or certification. Therefore no `Compliance` or `TrustCenter` pointer
+    is emitted.

@@ -1,0 +1,743 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/statisticsapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.statistics;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
+}
+
+enum FilterOperator {
+  FILTER_OPERATOR_UNSPECIFIED = 0;
+  FILTER_OPERATOR_EQUAL = 1;
+  FILTER_OPERATOR_NOT_EQUAL = 2;
+}
+
+enum IssuerType {
+  ISSUER_TYPE_UNSPECIFIED = 0;
+  ISSUER_TYPE_CLUSTER = 1;
+  ISSUER_TYPE_DEVELOPER_ID = 2;
+  ISSUER_TYPE_SERVERLESS = 3;
+}
+
+enum HealthEventSourceType {
+  HEALTH_EVENT_SOURCE_TYPE_UNSPECIFIED = 0;
+  HEALTH_EVENT_SOURCE_TYPE_AGENT = 1;
+  HEALTH_EVENT_SOURCE_TYPE_TRUST_DOMAIN_SERVER = 2;
+}
+
+enum HealthEventType {
+  HEALTH_EVENT_TYPE_UNSPECIFIED = 0;
+  HEALTH_EVENT_TYPE_AGENT_RUNTIME = 1;
+  HEALTH_EVENT_TYPE_TDS_RUNTIME = 2;
+}
+
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_ACTIVE = 1;
+  AGENT_STATUS_INACTIVE = 2;
+  AGENT_STATUS_UNKNOWN = 3;
+  AGENT_STATUS_NOT_FOUND = 4;
+}
+
+enum ServerStatus {
+  SERVER_STATUS_UNSPECIFIED = 0;
+  SERVER_STATUS_ACTIVE = 1;
+  SERVER_STATUS_INACTIVE = 2;
+  SERVER_STATUS_UNKNOWN = 3;
+}
+
+enum ConfigStatus {
+  CONFIG_STATUS_UNSPECIFIED = 0;
+  CONFIG_STATUS_HEALTHY = 1;
+  CONFIG_STATUS_UNHEALTHY = 2;
+}
+
+enum SourceType {
+  SOURCE_TYPE_UNSPECIFIED = 0;
+  SOURCE_TYPE_CONTROL_PLANE = 1;
+  SOURCE_TYPE_TRUST_DOMAIN_SERVER = 2;
+  SOURCE_TYPE_AGENT = 3;
+}
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_AUDIT_LOG = 2;
+  EVENT_TYPE_FEDERATION_LINK_POLLED = 3;
+  EVENT_TYPE_WORKLOAD_CREDENTIAL_ISSUED = 4;
+  EVENT_TYPE_AGENT_ATTESTATION = 5;
+  EVENT_TYPE_WORKLOAD_CREDENTIAL_ERROR = 6;
+}
+
+message QueryRequest {
+  // Required. Trust domain to query for statistics.
+  string trust_domain_id = 1;
+  // Required. Statistic to query.  Supported statistics:  - workload.credentials_issued: Count
+  // of credentials issued in a given time range - workload.active_credentials: Count of active,
+  // non-expired credentials in a given time range - workload.active_workloads: Count of distinct
+  // SPIFFE IDs in active credentials in a given time range - health_events.count: Count of
+  // health events in a given time range
+  string statistic = 2;
+  // Start of time range for query.
+  google.protobuf.Timestamp from_ts = 3;
+  // End of time range for query.
+  google.protobuf.Timestamp to_ts = 4;
+  // Bucket interval size for query.
+  uint32 interval_ms = 5;
+  // Deprecated. Use query_filters for better operator support.  Deprecated: Marked as deprecated
+  // in api/v1/statisticsapi/api.proto.
+  map<string, string> filters = 6;
+  // Optional. Filters to narrow the query. Supported fields vary by statistic:
+  // workload.credentials_issued, workload.active_credentials, workload.active_workloads: *
+  // trust_domain_id * svid_type                    — SVID type (e.g. X509, JWT) * type
+  // — deprecated alias for svid_type * issuer_type                  — type of issuer (e.g.
+  // cluster, developer-identity) * spiffe_id * trust_domain_deployment_name *
+  // trust_domain_replica_id * issuer_id * issuer_parent_id  health_events.count: *
+  // trust_domain_id * error_message * event_name * event_description  Multiple filters are
+  // combined with AND logic.
+  repeated FieldFilter query_filters = 7;
+}
+
+message Float64Value {
+  // Timestamp for value.
+  google.protobuf.Timestamp ts = 1;
+  // Numeric value in the series.
+  double value = 2;
+}
+
+message Series {
+  // Series group name.
+  string group = 1;
+  // Series values in order of time.
+  repeated Float64Value values = 2;
+}
+
+message QueryResponse {
+  // Start of time range for all series.
+  google.protobuf.Timestamp from_ts = 1;
+  // End of time range for all series.
+  google.protobuf.Timestamp to_ts = 2;
+  // Bucket interval size for all series.
+  uint32 interval_ms = 3;
+  // List of time series.
+  repeated Series series = 4;
+}
+
+message CountRequest {
+  // Required. Trust domain to query for statistics.
+  string trust_domain_id = 1;
+  // Required. Statistic to query.  Supported statistics are the same as Query, but Count
+  // currently only supports:  - workload.credentials_issued - workload.active_credentials -
+  // workload.active_workloads
+  string statistic = 2;
+  // Required. Dimension to count by.  Supported dimensions:  - jwt_audience: JWT audience claim
+  // (jwt_attributes.audience) - trust_domain: Trust domain ID - trust_domain_deployment: Trust
+  // domain deployment name - svid_type: SVID type (e.g. X509, JWT) - spiffe_id: SPIFFE ID of the
+  // workload - issuer_id: ID of the issuer (e.g. cluster ID) - version: Version of the issuing
+  // component
+  string dimension = 3;
+  // Optional. If set, only return the count for this dimension value.
+  string dimension_value = 4;
+  // Start of time range for query.
+  google.protobuf.Timestamp from_ts = 5;
+  // End of time range for query.
+  google.protobuf.Timestamp to_ts = 6;
+  // Optional. Filters to narrow the count. Supported fields vary by statistic:
+  // workload.credentials_issued, workload.active_credentials, workload.active_workloads: *
+  // trust_domain_id * svid_type                    — SVID type (e.g. X509, JWT) * type
+  // — deprecated alias for svid_type * issuer_type                  — type of issuer (e.g.
+  // cluster, developer-identity) * spiffe_id * trust_domain_deployment_name *
+  // trust_domain_replica_id * issuer_id * issuer_parent_id  Multiple filters are combined with
+  // AND logic.
+  repeated FieldFilter query_filters = 7;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 8;
+  // Optional. Page token. If not set, will return the first page limited by page_size.
+  string page_token = 9;
+}
+
+message CountValue {
+  // The dimension value.
+  string value = 1;
+  // Cardinality for this dimension value.
+  uint64 count = 2;
+}
+
+message CountResponse {
+  // Count values keyed by dimension value.
+  repeated CountValue values = 1;
+  // Total number of dimension buckets returned in `values`.
+  uint64 total_dimensions = 2;
+  // Total cardinality across all matching documents for the count statistic, after applying any
+  // `dimension_value` filter (if set). This can differ from the sum of counts in values - if
+  // there are duplicate dimension values in the query - if there are more documents than the
+  // page size - for high cardinality statistics, the total counts may be approximate (HLL)
+  uint64 total_counts = 3;
+  // If additional dimension buckets exist but were not listed due to page size, the next page
+  // token will be set and the client can use it to get the next page. Note that all other
+  // request fields must be the same as the previous request.
+  string next_page_token = 4;
+}
+
+message FieldFilter {
+  // Required. Field to filter by.
+  string field = 1;
+  // Required. Filter operator.
+  FilterOperator operator = 2;
+  // Required. Value to filter by.
+  string value = 3;
+}
+
+message FieldSort {
+  // Required. Field to sort by.
+  string field = 1;
+  // Required. Sort order (ascending or descending).
+  SortOrder order = 2;
+}
+
+message HealthEventsRequest {
+  // Deprecated. Optional Filters.
+  HealthEventFilter filter = 1;
+  // Required. Time range. Point in time from which to start the query. For example, to get
+  // events from the last 24 hours, set this to now()-24h and end_time to now().
+  google.protobuf.Timestamp start_time = 2;
+  // Required. Time range. Point in time until which to end the query. For example, to get events
+  // from the last 24 hours, set this to now() and start_time to now()-24h.
+  google.protobuf.Timestamp end_time = 3;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 4;
+  // Optional. Page token. If not set, will return the first page limit by page_size.
+  string page_token = 5;
+  // Optional. Sort fields. If not set, will sort by ts DESC, id DESC. Supported fields for
+  // sorting: - ts (timestamp) - event_name - event_description - error_message
+  repeated FieldSort sort_by = 6;
+  // Optional. Filters to apply. Multiple filters are combined with AND logic. Supported fields
+  // for filtering: - source_type - source_id - event_type - event_name - event_description -
+  // error_code - error_message - trust_domain_id - trust_domain_deployment_name
+  repeated FieldFilter filters = 7;
+  // Required. Trust domain to query for health events.
+  string trust_domain_id = 8;
+}
+
+message HealthEventsResponse {
+  // Health events list
+  repeated HealthEvent events = 1;
+  // Total count of events matching the query criteria
+  uint64 total_count = 2;
+  // If additional events exist but were not listed due to page size, the next page token will be
+  // set and the client can use it to get the next page. Note that filters must be the same as
+  // the previous request to iterate over the same events.
+  string next_page_token = 3;
+}
+
+message HealthEventFilter {
+  // Filter by the source type.
+  HealthEventSourceType by_source_type = 1;
+  // Filter by the source ID.
+  string by_source_id = 2;
+  // Filter by the event type.
+  HealthEventType by_event_type = 3;
+  // Filter by the event name.
+  string by_event_name = 4;
+  // Filter by error code.
+  string by_error_code = 5;
+  // Filter by trust domain ID.
+  string by_trust_domain_id = 6;
+  // Filter by trust domain deployment name.
+  string by_trust_domain_deployment_name = 7;
+}
+
+message HealthEvent {
+  // Unique identifier for the event
+  string id = 1;
+  // Timestamp when the event occurred
+  google.protobuf.Timestamp event_timestamp = 2;
+  // Type of the source that generated the event
+  HealthEventSourceType source_type = 3;
+  // ID of the source that generated the event
+  string source_id = 4;
+  // Organization ID
+  string org_id = 5;
+  // Trust domain ID
+  string trust_domain_id = 6;
+  // Trust domain deployment name
+  string trust_domain_deployment_name = 7;
+  // Type of the event
+  HealthEventType event_type = 8;
+  // Name of the event
+  string event_name = 9;
+  // Description of the event
+  string event_description = 10;
+  // Version of the component that generated the event
+  string component_version = 11;
+  // Error code if the event represents an error
+  string error_code = 12;
+  // Error message if the event represents an error
+  string error_message = 13;
+  // Additional attributes of the event in JSON format
+  string attributes = 14;
+}
+
+message SVIDIssuedEventFilter {
+  // Filter by issuer_type (e.g., cluster, developer-identity)
+  string by_issuer_type = 1;
+  // Filter by SPIFFE ID
+  string by_spiffe_id = 4;
+  // Filter by SVID type (e.g., X509, JWT)
+  string by_svid_type = 5;
+  // Filter by workload attribute key
+  string by_workload_attribute_key = 6;
+  // Filter by workload attribute value
+  string by_workload_attribute_value = 7;
+  // Filter by provider attribute key
+  string by_provider_attribute_key = 8;
+  // Filter by provider attribute value
+  string by_provider_attribute_value = 9;
+}
+
+message SVIDIssuedEventsRequest {
+  // Required. Trust domain to query for SVID issued events.
+  string trust_domain_id = 1;
+  // Deprecated. Use query_filters instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  SVIDIssuedEventFilter filter = 2;
+  // Start of time range for query.
+  google.protobuf.Timestamp from_ts = 3;
+  // End of time range for query.
+  google.protobuf.Timestamp to_ts = 4;
+  // Bucket interval size for query (optional, for future use).
+  uint32 interval_ms = 5;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 6;
+  // Optional. Page token. If not set, will return the first page limit by page_size.
+  string page_token = 7;
+  // Optional. Filters to apply. Supported fields: - issuer_type                  — type of
+  // issuer (e.g. cluster, developer-identity) - type                         — deprecated alias
+  // for svid_type - svid_type                    — SVID type (e.g. X509, JWT) - spiffe_id -
+  // trust_domain_deployment_name - trust_domain_replica_id - issuer_id - issuer_parent_id -
+  // svid_hash - event_id
+  repeated FieldFilter query_filters = 8;
+  // Optional. Sort fields. If not set, will sort by ts DESC, id DESC. Not yet supported in
+  // backend. Placeholder for future use and API consistency. Supported fields for sorting: - ts
+  // (timestamp) - id
+  repeated FieldSort sort_by = 9;
+}
+
+message SVIDIssuedEventsResponse {
+  // SVID issued events list
+  repeated SVIDIssuedEvent events = 1;
+  // Total count of events matching the query criteria
+  uint64 total_count = 2;
+  // If additional events exist but were not listed due to page size, the next page token will be
+  // set and the client can use it to get the next page.
+  string next_page_token = 3;
+}
+
+message SVIDIssuedEvent {
+  // Unique identifier for the event
+  string id = 1;
+  // Timestamp when the credential was issued
+  google.protobuf.Timestamp issued_at = 2;
+  // Timestamp when the credential expires
+  google.protobuf.Timestamp expires_at = 3;
+  // Trust domain ID
+  string trust_domain_id = 4;
+  // Issuer type.
+  IssuerType issuer_type = 5;
+  // Issuer ID
+  string issuer_id = 6;
+  // Agent ID
+  string agent_id = 7;
+  // SPIFFE ID
+  string spiffe_id = 8;
+  // SVID type (e.g., X509, JWT)
+  string svid_type = 9;
+  // Workload attributes (key-value pairs)
+  repeated Attribute workload_attributes = 10;
+  // Provider attributes (key-value pairs)
+  repeated Attribute provider_attributes = 11;
+  // JWT SVID attributes, if applicable. Can be empty for old events.
+  JWTAttributes jwt_attributes = 12;
+  // X.509 SVID attributes, if applicable. Can be empty for old events.
+  X509Attributes x509_attributes = 13;
+  // Workload attestor extensions used during SVID issuance.
+  repeated WorkloadAttestor workload_attestor = 14;
+  // Whether the SVID issuance was successful.
+  bool success = 15;
+  // Error message if the SVID issuance failed.
+  string error_message = 16;
+  // Issuer parent ID when present (e.g. cluster ID for cluster issuer).
+  string issuer_parent_id = 17;
+  // Agent attributes (key-value pairs)
+  repeated Attribute agent_attributes = 18;
+  // Optional. ID of the keyset that signed the SVID. Empty for events emitted before this field
+  // was added.
+  string key_set_id = 19;
+}
+
+message Attribute {
+  string origin = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message JWTAttributes {
+  // Optional. JWT ID (jti) for the JWT SVID.
+  string jti = 1;
+  // Required. Audience for the JWT SVID
+  repeated string audience = 2;
+  // Required. Issuer for the JWT SVID
+  string issuer = 3;
+  // Required. Key ID used to sign the JWT SVID
+  string key_id = 4;
+}
+
+message X509Attributes {
+  // Required. Serial number of the X.509 SVID.
+  string serial_number = 1;
+  // Required. Subject DN of the X.509 SVID.
+  string subject_dn = 2;
+  // Optional. Subject CN of the X.509 SVID.
+  string subject_cn = 3;
+  // Required. Issuer DN of the X.509 SVID.
+  string issuer_dn = 4;
+  // Optional. Issuer CN of the X.509 SVID.
+  string issuer_cn = 5;
+  // Required. SHA-1 fingerprint of the X.509 SVID leaf certificate.
+  bytes sha1_fingerprint = 6;
+  // Required. SHA-256 fingerprint of the X.509 SVID leaf certificate.
+  bytes sha256_fingerprint = 7;
+  // Optional. Authority Key Identifier of the X.509 SVID.
+  bytes authority_key_id = 8;
+  // Optional. Subject Key Identifier of the X.509 SVID.
+  bytes subject_key_id = 9;
+}
+
+message WorkloadAttestor {
+  // The name of the attestation extension.
+  string extension_name = 1;
+  // The version of the attestation extension.
+  string extension_version = 2;
+  // The time taken by the extension to complete, in milliseconds.
+  int64 duration_ms = 3;
+}
+
+message ListAgentsRequest {
+  // Required. Trust domain to query for agents.
+  string trust_domain_id = 1;
+  // Optional. Filter by realm ID.
+  string realm_id = 2;
+  // Optional. Filter by cluster ID.
+  string cluster_id = 3;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 4;
+  // Optional. Page token. If not set, will return the first page limit by page_size.
+  string page_token = 5;
+  // Optional. Whether to include agent metadata (e.g. version). Defaults to true.
+  bool include_metadata = 6;
+}
+
+message ListAgentsResponse {
+  // Agents list.
+  repeated Agent agents = 1;
+  // Total count of agents matching the query criteria.
+  uint64 total_count = 2;
+  // If additional agents exist but were not listed due to page size, the next page token will be
+  // set and the client can use it to get the next page. Note that filters must be the same as
+  // the previous request to iterate over the same agents.
+  string next_page_token = 3;
+}
+
+message Agent {
+  // Agent ID (maps from AgentStatusDoc.AgentID / AgentMetadataDoc.AgentID).
+  string agent_id = 1;
+  // Cluster ID the agent belongs to (maps from ClusterID).
+  string cluster_id = 2;
+  // Timestamp when the agent was last seen (maps from AgentStatusDoc.LastSeen).
+  google.protobuf.Timestamp last_seen = 3;
+  // Deprecated: Use agent_status instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  string status = 4;
+  // Version of the agent (maps from AgentMetadataDoc.Version).
+  string version = 5;
+  // Realm ID if the agent's cluster belongs to a realm.
+  string realm_id = 6;
+  // Status of the agent (active/inactive based on last_seen TTL).
+  AgentStatus agent_status = 7;
+}
+
+message DescribeAgentsRequest {
+  // Required. Trust domain all requested agents belong to.
+  string trust_domain_id = 1;
+  // Required. Agent IDs to describe. Max 100 per call.
+  repeated string agent_ids = 2;
+}
+
+message DescribeAgentsResponse {
+  // One entry per requested agent_id, in the same order as the request. Agents not found in
+  // OpenSearch are returned with only agent_id populated and agent_status =
+  // AGENT_STATUS_NOT_FOUND.
+  repeated Agent agents = 1;
+}
+
+message ListServersRequest {
+  // Required. Trust domain to query for servers.
+  string trust_domain_id = 1;
+  // Optional. Filter by trust domain deployment name.
+  string trust_domain_deployment_name = 2;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 3;
+  // Optional. Page token. If not set, will return the first page limit by page_size.
+  string page_token = 4;
+  // Optional. Time windows for SVID count enrichment. Pass these in as a string value (i.e. 1h,
+  // 60m, or 3600s) If empty, SVID counts are not returned.
+  repeated google.protobuf.Duration svid_count_windows = 5;
+  // Optional. Filter to a specific server ID.
+  string server_id = 6;
+}
+
+message ListServersResponse {
+  // Servers list.
+  repeated Server servers = 1;
+  // Total count of servers matching the query criteria.
+  uint64 total_count = 2;
+  // If additional servers exist but were not listed due to page size, the next page token will
+  // be set and the client can use it to get the next page. Note that filters must be the same as
+  // the previous request to iterate over the same servers.
+  string next_page_token = 3;
+}
+
+message ServerConfigStatus {
+  // Most recent config version the server attempted to apply.
+  string config_last_attempted_version = 1;
+  // Timestamp of the most recent config application attempt.
+  google.protobuf.Timestamp config_last_attempted_at = 2;
+  // Most recent config version the server successfully applied.
+  string config_last_applied_version = 3;
+  // Timestamp when the current config was successfully applied.
+  google.protobuf.Timestamp config_applied_at = 4;
+  // Config application status.
+  ConfigStatus config_status = 5;
+  // Error message if the most recent config application failed.
+  string config_error = 6;
+  // Latest config version pushed to this server by the control plane.
+  string config_desired_version = 7;
+}
+
+message Server {
+  // Server ID.
+  string server_id = 1;
+  // Trust domain deployment name this server belongs to.
+  string trust_domain_deployment_name = 2;
+  // Timestamp when the server was last seen.
+  google.protobuf.Timestamp last_seen = 3;
+  // Deprecated: Use server_status instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  string status = 4;
+  // Version of the server binary.
+  string version = 5;
+  // Number of active agents associated with this server.
+  uint64 agents_active = 6;
+  // Deprecated: Use svid_counts instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  uint64 svids_active = 7;
+  // Deprecated: Use svid_counts instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  uint64 svids_total = 8;
+  // SVID counts per requested window.
+  repeated SVIDWindowCount svid_counts = 12;
+  // Status of the server (active/inactive based on last_seen TTL).
+  ServerStatus server_status = 13;
+  // Config status telemetry. Absent means no data has been received yet.
+  ServerConfigStatus config_status = 21;
+}
+
+message SVIDWindowCount {
+  // Time window duration.
+  google.protobuf.Duration window = 1;
+  // Number of unique SVIDs issued in the window.
+  uint64 count = 2;
+}
+
+message ListActivityFeedRequest {
+  // Required. Start of time range for the query.
+  google.protobuf.Timestamp start_time = 1;
+  // Required. End of time range for the query.
+  google.protobuf.Timestamp end_time = 2;
+  // Required. The page size for the query (minimum 1, maximum 1000).
+  uint32 page_size = 3;
+  // Optional. Page token for pagination. If not set, returns the first page.
+  string page_token = 4;
+  // Optional. Filters to apply. Multiple filters are combined with AND logic. Supported fields
+  // for filtering: - event_type - source_type - trust_domain_id - client (one of: "console",
+  // "spirlctl", "terraform", "sdk", "unknown"). Only applies to audit_log events; other event
+  // types have no client and will not match a client filter. Use FILTER_OPERATOR_NOT_EQUAL to
+  // exclude a client (e.g. to hide Console activity from the feed).
+  repeated FieldFilter filters = 5;
+}
+
+message ListActivityFeedResponse {
+  // Activity feed entries.
+  repeated ActivityFeedEntry entries = 1;
+  // Total count of entries matching the query criteria.
+  uint64 total_count = 2;
+  // If additional entries exist, use this token to fetch the next page.
+  string next_page_token = 3;
+}
+
+message ActivityFeedEntry {
+  // Unique identifier for the entry.
+  string id = 1;
+  // Timestamp when the action occurred.
+  google.protobuf.Timestamp timestamp = 2;
+  // Trust domain ID, if applicable.
+  string trust_domain_id = 3;
+  // Raw event type string from the event source.
+  string raw_event_type = 4;
+  // Raw attributes JSON blob from the event source.
+  string raw_attributes = 5;
+  // The source system that produced this event.
+  SourceType source_type = 6;
+  // The type of event.
+  EventType event_type = 7;
+}
+
+message AuditLogAttributes {
+  // Request ID of the audited RPC call.
+  string request_id = 1;
+  // Source system that initiated the request.
+  string source = 2;
+  // Service that handled the request.
+  string service = 3;
+  // RPC method that was called.
+  string method = 4;
+  // Trust domain name associated with the request.
+  string trust_domain_name = 5;
+  // Actor who performed the action.
+  string actor = 6;
+  // gRPC status code of the response.
+  string status_code = 7;
+  // Client that initiated the request (e.g. "console", "spirlctl", "terraform", "sdk",
+  // "unknown"). Matches the values accepted by the `client` filter on ListActivityFeedRequest.
+  string client = 8;
+  // Version of the client that initiated the request. Populated for spirlctl and terraform; may
+  // be empty for other clients.
+  string client_version = 9;
+}
+
+message FederationLinkPolledAttributes {
+  // HTTP log from the poll attempt, if present.
+  string http_log = 1;
+  // Error message from the poll attempt, if present.
+  string error = 2;
+  // Name of the foreign trust domain that was polled.
+  string foreign_trust_domain_name = 3;
+}
+
+message WorkloadCredentialIssuedAttributes {
+  // RPC method used for issuance.
+  string rpc = 1;
+  // Agent ID that requested the credential.
+  string agent_id = 2;
+  // Issuer type.
+  IssuerType issuer_type = 3;
+  // Issuer ID.
+  string issuer_id = 4;
+  // Issuer parent ID (e.g. cluster ID for cluster issuer).
+  string issuer_parent_id = 5;
+  // SVID type (e.g. x509, jwt).
+  string svid_type = 6;
+  // Hash of the issued SVID.
+  string svid_hash = 7;
+  // Expiration time of the issued SVID.
+  string svid_expires = 8;
+  // SPIFFE ID of the issued credential.
+  string spiffe_id = 9;
+  // JWT-specific attributes, if applicable.
+  JWTAttributes jwt_attributes = 10;
+  // X.509-specific attributes, if applicable.
+  X509Attributes x509_attributes = 11;
+  // Workload attestation key-value pairs.
+  repeated Attribute workload_attestation = 12;
+  // Provider attestation key-value pairs.
+  repeated Attribute provider_attestation = 13;
+  // Workload attestor extensions used during issuance.
+  repeated WorkloadAttestor workload_attestor_extensions = 14;
+  // ID of the signing keyset used to issue the credential.
+  string key_set_id = 15;
+}
+
+message AgentAttestationAttributes {
+  // Type of attestation performed.
+  string attestation_type = 1;
+  // Whether the attestation succeeded.
+  bool success = 2;
+  // Deprecated. Use error instead.  Deprecated: Marked as deprecated in
+  // api/v1/statisticsapi/api.proto.
+  string error_message = 3;
+  // Name of the attestation extension used.
+  string extension_name = 4;
+  // Version of the attestation extension used.
+  string extension_version = 5;
+  // Agent ID that performed the attestation.
+  string agent_id = 6;
+  // Cluster ID where the attestation occurred.
+  string cluster_id = 7;
+  // Cluster version ID at the time of attestation.
+  string cluster_version_id = 8;
+  // Error message if the attestation failed.
+  string error = 9;
+}
+
+message WorkloadCredentialErrorAttributes {
+  // RPC method that was called.
+  string rpc = 1;
+  // Issuer type.
+  IssuerType issuer_type = 2;
+  // Issuer ID.
+  string issuer_id = 3;
+  // Issuer parent ID (e.g. cluster ID for cluster issuer).
+  string issuer_parent_id = 4;
+  // SVID type (e.g. x509, jwt).
+  string svid_type = 5;
+  // SPIFFE ID, if it was derived before the error occurred.
+  string spiffe_id = 6;
+  // Error message describing the failure.
+  string error = 7;
+  // The operation being performed when the error occurred (e.g. "issue").
+  string operation = 8;
+  // The broad error category (e.g. "issuance_error").
+  string category = 9;
+  // Agent ID that requested the credential.
+  string agent_id = 10;
+}
+
+service API {
+  rpc Query(QueryRequest) returns (QueryResponse);
+  rpc Count(CountRequest) returns (CountResponse);
+  rpc HealthEvents(HealthEventsRequest) returns (HealthEventsResponse);
+  rpc SVIDIssuedEvents(SVIDIssuedEventsRequest) returns (SVIDIssuedEventsResponse);
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
+  rpc DescribeAgents(DescribeAgentsRequest) returns (DescribeAgentsResponse);
+  rpc ListServers(ListServersRequest) returns (ListServersResponse);
+  rpc ListActivityFeed(ListActivityFeedRequest) returns (ListActivityFeedResponse);
+}

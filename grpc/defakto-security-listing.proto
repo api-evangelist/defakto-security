@@ -1,0 +1,58 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/listing/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.listing;
+
+enum FilterOperator {
+  FILTER_OPERATOR_UNSPECIFIED = 0;
+  FILTER_OPERATOR_EQUAL = 1;
+  FILTER_OPERATOR_CONTAINS = 3;
+  FILTER_OPERATOR_GREATER_THAN_OR_EQUAL = 4;
+  FILTER_OPERATOR_LESS_THAN_OR_EQUAL = 5;
+}
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
+}
+
+message FieldFilter {
+  // Required. The int32 value of the entity-specific FilterField enum. Must be non-zero (the
+  // enum's UNSPECIFIED value is rejected).
+  int32 field = 1;
+  // Required. Filter operator.
+  FilterOperator operator = 2;
+  // Required. Value to filter by. The value is a string regardless of the underlying column
+  // type; the server parses it per-field. The accepted encoding depends on the field type: -
+  // string columns: the literal value. - integer columns: the decimal representation (e.g.
+  // "42"). - boolean columns: "true" or "false". - enum columns: the proto enum value name (e.g.
+  // "KUBERNETES_WORKLOAD_TYPE_DEPLOYMENT") or its decimal int32 value, per the field's
+  // documentation. - timestamp columns: an RFC 3339 timestamp (e.g. "2025-01-02T15:04:05Z").
+  // Individual fields may layer additional decoding on top of these (for example, mapping an
+  // enum-named value to an ordinal-range filter); see the per-field documentation for the exact
+  // accepted encoding. Unparseable values yield INVALID_ARGUMENT with a field detail.
+  string value = 3;
+}
+
+message FieldSort {
+  // Required. The int32 value of the entity-specific SortField enum. Must be non-zero (the
+  // enum's UNSPECIFIED value is rejected).
+  int32 field = 1;
+  // Required. Sort order (ascending or descending).
+  SortOrder order = 2;
+}

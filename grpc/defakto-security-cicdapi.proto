@@ -1,0 +1,124 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/cicdapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.cicd;
+
+enum CICDType {
+  CICDTYPE_UNKNOWN = 0;
+  CICDTYPE_JENKINS = 1;
+  CICDTYPE_GITHUB_SAAS = 2;
+  CICDTYPE_GITHUB_SELF_HOSTED = 3;
+  CICDTYPE_GITHUB_HYBRID = 4;
+  CICDTYPE_GITLAB_SAAS = 5;
+  CICDTYPE_GITLAB_SELF_HOSTED = 6;
+  CICDTYPE_GITLAB_HYBRID = 7;
+}
+
+message CreateCICDProfileRequest {
+  // Required. The name of the profile
+  string name = 1;
+  // Required. The issuer url on the CI/CD JWT Token
+  string issuer = 3;
+  // Optional. The JWKS URL if different from the type default
+  string jwks_url = 4;
+}
+
+message CreateCICDProfileResponse {
+  CICDProfile profile = 1;
+}
+
+message ListCICDProfilesRequest {
+}
+
+message ListCICDProfilesResponse {
+  repeated CICDProfile profiles = 1;
+}
+
+message DeleteCICDProfileRequest {
+  // Required. The ID of the profile to be deleted
+  string id = 1;
+}
+
+message DeleteCICDProfileResponse {
+}
+
+message LinkCICDProfileRequest {
+  // Required. The ID of the CI/CD profile to be linked
+  string ci_cd_profile_id = 1;
+  // Required. The cluster ID to link the CI/CD profile to
+  string cluster_id = 2;
+}
+
+message LinkCICDProfileResponse {
+  // The link information
+  CICDProfileLink link = 1;
+}
+
+message UnlinkCICDProfileRequest {
+  // Required. The ID of the CI/CD profile to be unlinked
+  string ci_cd_profile_id = 1;
+  // Required. The cluster ID to unlink the CI/CD profile from
+  string cluster_id = 2;
+}
+
+message UnlinkCICDProfileResponse {
+}
+
+message ListCICDProfileLinksRequest {
+  // Optional. The ID of the CI/CD profile to list links for
+  string ci_cd_profile_id = 1;
+  // Optional. The cluster ID to list links for
+  string cluster_id = 2;
+}
+
+message ListCICDProfileLinksResponse {
+  // A list of linked profiles
+  repeated CICDProfileLink links = 1;
+}
+
+message CICDProfile {
+  // The ID of the profile
+  string id = 1;
+  // The profile name
+  string name = 3;
+  // The token issuer
+  string issuer = 4;
+  // The JWKS URL to validate the token
+  string jwks_url = 7;
+}
+
+message CICDProfileLink {
+  // The ID of the link
+  string id = 1;
+  // The ID of the linked profile
+  string ci_cd_profile_id = 2;
+  // The cluster ID the profile is linked to
+  string cluster_id = 3;
+  // The timestamp when the link was created
+  int64 created_at = 4;
+  // The trust domain ID the cluster belongs to
+  string trust_domain_id = 5;
+}
+
+service API {
+  rpc CreateCICDProfile(CreateCICDProfileRequest) returns (CreateCICDProfileResponse);
+  rpc ListCICDProfiles(ListCICDProfilesRequest) returns (ListCICDProfilesResponse);
+  rpc DeleteCICDProfile(DeleteCICDProfileRequest) returns (DeleteCICDProfileResponse);
+  rpc LinkCICDProfile(LinkCICDProfileRequest) returns (LinkCICDProfileResponse);
+  rpc UnlinkCICDProfile(UnlinkCICDProfileRequest) returns (UnlinkCICDProfileResponse);
+  rpc ListCICDProfileLinks(ListCICDProfileLinksRequest) returns (ListCICDProfileLinksResponse);
+}

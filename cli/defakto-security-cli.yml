@@ -1,0 +1,154 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/cli/spirlctl/overview.md
+docs:
+- https://d.defakto.security/cli.md
+- https://d.defakto.security/cli/spirlctl/overview.md
+- https://d.defakto.security/cli/spirldbg.md
+- https://d.defakto.security/mint/quick-start/download-spirlctl.md
+note: >-
+  The CLI is the primary interface to Defakto, not a convenience wrapper — with no REST API
+  and no public .proto files, spirlctl and the Go SDK are the only two supported ways to drive
+  the control plane. Three first-party command-line tools ship: spirlctl (platform), spirldbg
+  (workload API debugging) and spiffecli (standalone SPIFFE Workload API client). Binary
+  distribution details live in packages/defakto-security-packages.yml.
+tools:
+- name: spirlctl
+  description: >-
+    Command-line utility to interact with and manage Defakto cloud plus the Defakto components
+    installed in a customer environment. Pronounced "spai·ruhl cuddle".
+  version: 0.35.0
+  released: '2026-07-29'
+  install:
+  - method: homebrew
+    command: |
+      brew tap spirl/tap
+      brew install spirlctl
+  - method: tarball
+    url: https://spirl-releases.s3.us-west-2.amazonaws.com/spirlctl/v0.35.0/
+    platforms: [linux-amd64, linux-arm64, darwin-amd64, darwin-arm64, windows-amd64, windows-arm64]
+  config_file: ~/.spirl/config.json
+  output_formats:
+  - text (default)
+  - json (--output json / -o json, on trust-domain info, cluster info, node-group info)
+  help:
+  - spirlctl help
+  - spirlctl [command] --help
+  - spirlctl [command] [subcommand] --help
+  command_groups:
+  - group: login / logout / whoami
+    description: Session management.
+    commands:
+    - spirlctl login
+    - spirlctl login --org <org>
+    - spirlctl login --hint <email>
+    - spirlctl login --headless
+    - spirlctl login --service-account-key-id sak-<id> --private-key-file <path>
+    - spirlctl whoami
+    - spirlctl logout
+  - group: trust-domain
+    description: SPIFFE trust domain lifecycle, keys, deployments and OAuth issuer config.
+    commands:
+    - spirlctl trust-domain create <name>
+    - spirlctl trust-domain update <name>
+    - spirlctl trust-domain list
+    - spirlctl trust-domain info <name>
+    - spirlctl trust-domain info <name> --output json
+    - spirlctl trust-domain deployment create <name> --trust-domain <td> --output-helm-values <file>
+    flags:
+    - --oauth-issuer
+    - --no-oauth-issuer
+    - --builtin-oauth-issuer
+    - --self-hosted
+  - group: cluster
+    description: Kubernetes and Linux node-group cluster management.
+    commands:
+    - spirlctl cluster add <name> --trust-domain <td> --platform k8s
+    - spirlctl cluster list
+    - spirlctl cluster list --realm <realm>
+    - spirlctl cluster info <name> --trust-domain <td>
+    - spirlctl cluster info <name> --output json
+    - spirlctl cluster config list <name> --trust-domain <td>
+    - spirlctl cluster register
+    - spirlctl cluster disable
+    - spirlctl cluster delete
+    - spirlctl cluster workloads list
+  - group: node-group
+    description: Linux-runtime cluster equivalents.
+    commands:
+    - spirlctl node-group info
+    - spirlctl node-group list-nodes
+    - spirlctl node-group workloads list
+  - group: realm
+    description: Realm lifecycle and delegated team administration.
+    docs: https://d.defakto.security/cli/spirlctl/realm-operations.md
+  - group: iam
+    description: Users, invitations, service accounts, WIF issuers and WIF configurations.
+    commands:
+    - spirlctl iam wif-issuer
+    - spirlctl iam service-account
+    - spirlctl iam service-account wif-config
+    docs: https://d.defakto.security/cli/spirlctl/service-accounts.md
+  - group: config
+    description: Managed Configuration read, set, diff and validate.
+    commands:
+    - spirlctl config set {org,trust-domain,trust-domain-deployment,cluster}
+    - spirlctl config validate {org,trust-domain,trust-domain-deployment,cluster}
+  - group: federation
+    description: Trust domain federation links and poll status.
+    commands:
+    - spirlctl federation list
+  - group: dev-id
+    description: Developer Identity — fetch and serve SVIDs to human developers locally.
+    commands:
+    - spirlctl dev-id fetch
+    - spirlctl dev-id serve
+    - spirlctl dev-id serve --jwt
+    note: Promoted out of experimental (`spirlctl exp dev-id`) in spirlctl 0.32.0.
+    docs: https://d.defakto.security/mint/dev-id/overview.md
+  - group: ledger
+    description: Secret discovery, risk scoring and eradication. GA in spirlctl 0.33.0.
+    commands:
+    - spirlctl ledger
+    docs: https://d.defakto.security/ledger.md
+  key_flows:
+  - name: Onboard a trust domain and cluster
+    steps:
+    - spirlctl login
+    - spirlctl trust-domain create example.com
+    - spirlctl cluster add production --trust-domain example.com --platform k8s
+    - spirlctl cluster info production --trust-domain example.com
+  - name: Non-interactive CI authentication
+    steps:
+    - spirlctl login --service-account-key-id sak-1234 --private-key-file /path/to/private.pem
+  - name: Rotate a signing key
+    steps:
+    - spirlctl trust-domain info <td>
+    - spirlctl trust-domain deployment key-set prepare
+    - spirlctl trust-domain deployment key-set activate
+    docs: https://d.defakto.security/cli/spirlctl/signing-key-rotation.md
+    confidence: medium
+    note: >-
+      Command spelling for the key-set subcommands is inferred from the PrepareDeploymentKeySet
+      / ActivateDeploymentKeySet RPCs and the signing-key-rotation guide; the exact CLI syntax
+      is not quoted on the public page.
+- name: spirldbg
+  description: Debugging utility for SPIFFE workload APIs.
+  docs: https://d.defakto.security/cli/spirldbg.md
+  releases: https://d.defakto.security/releases/spirldbg.md
+- name: spiffecli
+  description: >-
+    Standalone command line tool that runs a SPIFFE Workload API locally and requests and
+    validates SVIDs. Open on GitHub under the defakto-security org.
+  version: v0.1.3
+  released: '2026-07-02'
+  source: https://github.com/defakto-security/spiffecli
+  install: go install github.com/defakto-security/spiffecli@latest
+- name: spirl-perf
+  description: >-
+    Load testing tool that simulates large numbers of Defakto Agents logging in to the Trust
+    Domain Server and requesting X.509 SVIDs.
+  docs: https://d.defakto.security/mint/performance/spirl-perf.md
+- name: spirl-sync
+  description: Sync tool. Release history published; no usage documentation found.
+  releases: https://d.defakto.security/releases/spirl-sync.md

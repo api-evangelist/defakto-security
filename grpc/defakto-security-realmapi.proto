@@ -1,0 +1,90 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/realmapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.realm;
+
+import "google/protobuf/timestamp.proto";
+
+message CreateRealmRequest {
+  // Required. The ID of the trust domain to create the realm under.
+  string trust_domain_id = 1;
+  // Required. The name of the realm. Must be a valid SPIFFE ID path segment.
+  string name = 2;
+}
+
+message CreateRealmResponse {
+  // The ID of the created realm.
+  string realm_id = 1;
+}
+
+message ListRealmsRequest {
+  // Optional. Filter by trust domain ID.
+  string trust_domain_id = 1;
+  // Optional. Filter by realm name.
+  string name = 2;
+  // Optional. If set to true, includes dynamic/live data from events (cluster and workload/agent
+  // statistics). If false or unset, only data from the control-plane database is returned.
+  bool include_dynamic_data = 3;
+}
+
+message ListRealmsResponse {
+  repeated Realm realms = 1;
+}
+
+message DeleteRealmRequest {
+  // Required. The ID of the realm to delete.
+  string realm_id = 1;
+}
+
+message DeleteRealmResponse {
+}
+
+message Realm {
+  // The ID of the realm.
+  string id = 1;
+  // The ID of the organization this realm belongs to.
+  string org_id = 2;
+  // The ID of the trust domain this realm belongs to.
+  string trust_domain_id = 3;
+  // The name of the realm (used as SPIFFE ID path prefix).
+  string name = 4;
+  // The timestamp when the realm was created.
+  google.protobuf.Timestamp created_at = 5;
+  // Enumerated components in this realm. Only populated when include_dynamic_data is true.
+  RealmComponents components = 6;
+}
+
+message RealmComponents {
+  // The IDs of clusters in the realm. Only populated when include_dynamic_data is true.
+  repeated string clusters = 1;
+  int64 clusters_total = 2;
+  int64 clusters_active = 3;
+  // The IDs of active agents in the realm. Only populated when include_dynamic_data is true.
+  repeated string agents = 4;
+  int64 agents_active = 5;
+  // The workload IDs (SPIFFE IDs) in the realm. Only populated when include_dynamic_data is
+  // true.
+  repeated string workloads = 6;
+  int64 workloads_total = 7;
+  int64 workloads_active = 8;
+}
+
+service API {
+  rpc CreateRealm(CreateRealmRequest) returns (CreateRealmResponse);
+  rpc ListRealms(ListRealmsRequest) returns (ListRealmsResponse);
+  rpc DeleteRealm(DeleteRealmRequest) returns (DeleteRealmResponse);
+}

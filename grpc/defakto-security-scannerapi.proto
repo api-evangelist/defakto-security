@@ -1,0 +1,356 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/scannerapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.scanner;
+
+import "google/protobuf/timestamp.proto";
+
+enum ConnectorType {
+  CONNECTOR_TYPE_UNSPECIFIED = 0;
+  CONNECTOR_TYPE_AWS = 1;
+  CONNECTOR_TYPE_AZURE = 2;
+  CONNECTOR_TYPE_ANTHROPIC = 3;
+  CONNECTOR_TYPE_OPENAI = 4;
+  CONNECTOR_TYPE_GEMINI_EAP = 5;
+}
+
+enum ScannerConnectionStatus {
+  SCANNER_CONNECTION_STATUS_UNSPECIFIED = 0;
+  SCANNER_CONNECTION_STATUS_PENDING_CONNECTION = 1;
+  SCANNER_CONNECTION_STATUS_CONNECTED = 2;
+  SCANNER_CONNECTION_STATUS_FAILING = 3;
+  SCANNER_CONNECTION_STATUS_HEALTHY = 4;
+}
+
+enum ScannerDeploymentType {
+  SCANNER_DEPLOYMENT_TYPE_UNSPECIFIED = 0;
+  SCANNER_DEPLOYMENT_TYPE_SAAS = 1;
+  SCANNER_DEPLOYMENT_TYPE_SELF_HOSTED = 2;
+}
+
+enum FilterField {
+  FILTER_FIELD_UNSPECIFIED = 0;
+  FILTER_FIELD_SOURCE_TYPE = 1;
+  FILTER_FIELD_STATUS = 2;
+  FILTER_FIELD_SOURCE_NAME = 3;
+}
+
+enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0;
+  SORT_FIELD_CREATED_AT = 1;
+}
+
+enum ScannerFilterField {
+  SCANNER_FILTER_FIELD_UNSPECIFIED = 0;
+  SCANNER_FILTER_FIELD_DEPLOYMENT_TYPE = 1;
+  SCANNER_FILTER_FIELD_CONNECTOR_TYPE = 2;
+  SCANNER_FILTER_FIELD_CONNECTION_STATUS = 3;
+}
+
+enum ScannerSortField {
+  SCANNER_SORT_FIELD_UNSPECIFIED = 0;
+  SCANNER_SORT_FIELD_CREATED_AT = 1;
+}
+
+enum ScannerTargetStatus {
+  SCANNER_TARGET_STATUS_UNSPECIFIED = 0;
+  SCANNER_TARGET_STATUS_DISCOVERED = 1;
+  SCANNER_TARGET_STATUS_UNREACHABLE = 2;
+  SCANNER_TARGET_STATUS_HEALTHY = 3;
+  SCANNER_TARGET_STATUS_FAILING = 4;
+}
+
+enum ScannerTargetType {
+  SCANNER_TARGET_TYPE_UNSPECIFIED = 0;
+  SCANNER_TARGET_TYPE_AWS_ACCOUNT = 1;
+  SCANNER_TARGET_TYPE_AZURE_SUBSCRIPTION = 2;
+}
+
+message SaaSScannerConfig {
+}
+
+message AnthropicConnectorConfig {
+  // Required. The admin API key for the Anthropic organization. Only accepted on create; never
+  // returned by read endpoints.
+  string admin_key = 1;
+}
+
+message OpenAIConnectorConfig {
+  // Required. The admin API key for the OpenAI organization (begins with "sk-admin-"). Only
+  // accepted on create; never returned by read endpoints.
+  string admin_key = 1;
+}
+
+message GCPConnectorConfig {
+  // Required. GCP project ID hosting the resources to scan. Baked into the generated Terraform
+  // template so the customer doesn't have to fill in var.project_id themselves.
+  string project_id = 1;
+}
+
+message AWSConnectorConfig {
+  // Required. Scanning scope for AWS SaaS scanners.
+  AWSConnectorConfig_AwsScope scope = 1;
+  // Organization scope: set to true to disable auto-deployment to new accounts. When false
+  // (default), StackSet auto-deploys to new accounts joining the organization.
+  bool disable_auto_deploy = 2;
+  // Optional. AWS region where CloudFormation stacks and StackSet instances are created.
+  // Defaults to us-east-1 when omitted.
+  string region = 3;
+}
+
+message AzureConnectorConfig {
+  // Required. Scanning scope for Azure SaaS scanners.
+  AzureConnectorConfig_AzureScope scope = 1;
+}
+
+message SelfHostedScannerConfig {
+}
+
+message ScannerConfiguration {
+}
+
+message CreateScannerRequest {
+  // Required. The name of the scanner.
+  string name = 1;
+  // Optional. A description of the scanner.
+  string description = 2;
+  // Required. The configuration for the scanner.
+  ScannerConfiguration scanner_config = 4;
+}
+
+message PKIXPublicKey {
+  // Required. The public key in PKIX, ASN.1 DER format.
+  bytes data = 1;
+}
+
+message CreateScannerResponse {
+  // The id of the created scanner.
+  string scanner_id = 1;
+  // Only populated for self-hosted scanners
+  string scanner_key_id = 2;
+  // Only populated for SaaS scanners. Contains the IaC provisioning template for setting up the
+  // connector.
+  SaaSIACProvisioning iac_provisioning = 3;
+}
+
+message UpdateScannerRequest {
+  // Required. The scanner id.
+  string id = 1;
+}
+
+message UpdateScannerResponse {
+}
+
+message DeleteScannerRequest {
+  // Required. The id of the scanner to delete.
+  string scanner_id = 1;
+}
+
+message DeleteScannerResponse {
+}
+
+message ListScannersRequest {
+  // Optional. The name of the scanner to list. When set, performs an exact-match lookup and AND-
+  // combines with any entries in `filters`.
+  string scanner_name = 1;
+  // Optional. The page size for the query (minimum 1, maximum 200). If not set, defaults to 25.
+  // The same range and default are enforced server-side — any change here MUST be kept in sync
+  // with the server-side constants.
+  uint32 page_size = 2;
+  // Optional. Page token. If not set, will return the first page limited by page_size. The token
+  // is opaque and replays the page that was in flight when it was issued. Callers should pass
+  // the same filters and sort across pages for consistent results; the server does not currently
+  // enforce that.
+  string page_token = 3;
+  // Optional. Sort fields. At most one entry is accepted; supplying more yields
+  // INVALID_ARGUMENT. If not set, the server sorts by created_at DESC. The `field` is the int32
+  // value of one of the ScannerSortField enum values defined below: -
+  // SCANNER_SORT_FIELD_CREATED_AT
+  repeated FieldSort sort_by = 4;
+  // Optional. Filters to apply. Entries are AND-combined and at most one entry per field is
+  // accepted; supplying duplicates yields INVALID_ARGUMENT. The `field` is the int32 value of
+  // one of the ScannerFilterField enum values defined below: -
+  // SCANNER_FILTER_FIELD_DEPLOYMENT_TYPE - SCANNER_FILTER_FIELD_CONNECTOR_TYPE -
+  // SCANNER_FILTER_FIELD_CONNECTION_STATUS
+  repeated FieldFilter filters = 5;
+}
+
+message ListScannersResponse {
+  repeated Scanner scanners = 1;
+  // If additional scanners exist but were not listed due to page size, the next page token will
+  // be set and the client can use it to get the next page. The token is opaque and replays the
+  // page that was in flight when it was issued. Callers should pass the same filters and sort
+  // across pages for consistent results; the server does not currently enforce that.
+  string next_page_token = 2;
+  // The user-facing sort actually applied to this response.
+  FieldSort effective_sort = 3;
+}
+
+message GetScannerRequest {
+  // Required. The name of the scanner to retrieve.
+  string scanner_name = 1;
+}
+
+message GetScannerResponse {
+  // The requested scanner details.
+  Scanner scanner = 1;
+}
+
+message SaaSIACProvisioning {
+  // Terraform template for creating required connector resources (for SaaS scanners).
+  string terraform_template = 1;
+}
+
+message SelfHostedScannerDetails {
+}
+
+message SaaSAwSScannerDetails {
+  // The scanning scope for the AWS SaaS scanner.
+  AWSConnectorConfig_AwsScope scope = 1;
+  // The IAM role ARN used for scanning.
+  string role_arn = 2;
+  SaaSIACProvisioning iac_provisioning = 3;
+  // AWS region where CloudFormation stacks and StackSet instances are created.
+  string region = 4;
+}
+
+message SaaSAzureScannerDetails {
+  // The scanning scope for the Azure SaaS scanner.
+  AzureConnectorConfig_AzureScope scope = 1;
+  // The Azure AD tenant ID used for scanning.
+  string tenant_id = 2;
+  // The Application (client) ID used for scanning.
+  string client_id = 3;
+  SaaSIACProvisioning iac_provisioning = 4;
+}
+
+message SaaSAnthropicScannerDetails {
+}
+
+message SaaSOpenAIScannerDetails {
+}
+
+message SaaSGeminiEAPScannerDetails {
+  SaaSIACProvisioning iac_provisioning = 1;
+}
+
+message Scanner {
+  // The id of the scanner.
+  string id = 1;
+  // The name of the scanner.
+  string name = 2;
+  // A description of the scanner.
+  string description = 3;
+  // Timestamp when the scanner was created.
+  google.protobuf.Timestamp created_at = 4;
+  // The type of scanner (SaaS or self-hosted).
+  ScannerDeploymentType deployment_type = 5;
+  // The connector type (AWS, Azure, etc.). Only set for SaaS scanners.
+  ConnectorType connector_type = 6;
+  // Timestamp when the scanner was last updated.
+  google.protobuf.Timestamp updated_at = 10;
+  // The connection status of the scanner.
+  ScannerConnectionStatus connection_status = 11;
+  // The last error message from a failed connection probe or scan.
+  string last_error_message = 12;
+}
+
+message ListScannerTargetsRequest {
+  // Required. The ID of the scanner whose targets to list.
+  string scanner_id = 1;
+  // Optional. The page size for the query (minimum 1, maximum 200). If not set, defaults to 25.
+  // The same range and default are enforced server-side — any change here MUST be kept in sync
+  // with the server-side constants.
+  uint32 page_size = 2;
+  // Optional. Page token. If not set, will return the first page limited by page_size. The token
+  // is opaque and replays the page that was in flight when it was issued. Callers should pass
+  // the same filters and sort across pages for consistent results; the server does not currently
+  // enforce that.
+  string page_token = 3;
+  // Optional. Sort fields. At most one entry is accepted; supplying more yields
+  // INVALID_ARGUMENT. If not set, the server sorts by created_at DESC. The `field` is the int32
+  // value of one of the SortField enum values defined above: - SORT_FIELD_CREATED_AT
+  repeated FieldSort sort_by = 4;
+  // Optional. Filters to apply. Entries are AND-combined. The `field` is the int32 value of one
+  // of the FilterField enum values defined above: - FILTER_FIELD_SOURCE_TYPE -
+  // FILTER_FIELD_STATUS - FILTER_FIELD_SOURCE_NAME
+  repeated FieldFilter filters = 5;
+}
+
+message ListScannerTargetsResponse {
+  repeated ScannerTarget scanner_targets = 1;
+  // If additional scanner targets exist but were not listed due to page size, the next page
+  // token will be set and the client can use it to get the next page. The token is opaque and
+  // replays the page that was in flight when it was issued. Callers should pass the same filters
+  // and sort across pages for consistent results; the server does not currently enforce that.
+  string next_page_token = 2;
+  // The user-facing sort actually applied to this response.
+  FieldSort effective_sort = 3;
+}
+
+message ScannerTarget {
+  // The id of the scanner target.
+  string id = 1;
+  // The source identifier (e.g., AWS account ID, Azure subscription ID).
+  string source_id = 2;
+  // The human-readable name of the source.
+  string source_name = 3;
+  // The type of source.
+  ScannerTargetType source_type = 4;
+  // The hierarchy path (e.g., AWS OU path).
+  string hierarchy_path = 5;
+  // The current status of the target.
+  ScannerTargetStatus status = 6;
+  // The last error message, if any.
+  string last_error = 7;
+  // Timestamp when the target was first discovered.
+  google.protobuf.Timestamp created_at = 8;
+  // Timestamp when the target was last seen during resolution.
+  google.protobuf.Timestamp last_seen_at = 9;
+  // Timestamp when the target was last successfully scanned.
+  google.protobuf.Timestamp last_scanned_at = 10;
+}
+
+message UpdateScannerRequest_AWSConnectionCredentials {
+  // Required. The IAM role ARN to assume for scanning.
+  string role_arn = 1;
+}
+
+message UpdateScannerRequest_AzureConnectionCredentials {
+  // Required. Azure AD tenant ID
+  string tenant_id = 1;
+  // Required. Application (client) ID
+  string client_id = 2;
+}
+
+message UpdateScannerRequest_GCPConnectionCredentials {
+  // Required. The full workload-identity-pool-provider audience produced by the Terraform module
+  // (audience output).
+  string audience = 1;
+  // Required. The read-only service-account email the federated token will impersonate
+  // (service_account output).
+  string service_account = 2;
+}
+
+service API {
+  rpc CreateScanner(CreateScannerRequest) returns (CreateScannerResponse);
+  rpc UpdateScanner(UpdateScannerRequest) returns (UpdateScannerResponse);
+  rpc DeleteScanner(DeleteScannerRequest) returns (DeleteScannerResponse);
+  rpc ListScanners(ListScannersRequest) returns (ListScannersResponse);
+  rpc GetScanner(GetScannerRequest) returns (GetScannerResponse);
+  rpc ListScannerTargets(ListScannerTargetsRequest) returns (ListScannerTargetsResponse);
+}

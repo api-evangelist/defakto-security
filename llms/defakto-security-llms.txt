@@ -1,0 +1,211 @@
+# Defakto Documentation
+
+> Mint
+
+- [Defakto Documentation](/index.md)
+
+## category
+
+- [Anthropic Claude Integration](/category/anthropic-claude.md): Instructions and tutorials for using Defakto-issued credentials to authenticate workloads to the Anthropic Claude API.
+- [OpenAI Integration](/category/openai.md): Instructions and tutorials for using Defakto-issued credentials to authenticate workloads to the OpenAI API.
+- [SPIRL Developer Identity - Usage](/category/usage.md)
+
+## cli
+
+- [Command-line Tools](/cli.md): CLI tools for administrative and debugging tasks.
+- [spirlctl](/cli/spirlctl.md): Command reference for the Defakto CLI.
+- [Kubernetes cluster management](/cli/spirlctl/cluster-management.md): This guide covers the complete lifecycle of managing Kubernetes (K8s)
+- [Commands for managing organization users](/cli/spirlctl/invite-users.md): spirlctl provides commands to manage organization users. Users are added to the organization through invitations.
+- [Authentication: Login and Logout](/cli/spirlctl/login-logout.md): The spirlctl CLI requires authentication to interact with the Defakto platform. This guide covers the complete authentication workflow, including logging in, managing sessions, and logging out.
+- [spirlctl cli utility](/cli/spirlctl/overview.md): spirlctl (pronounced like spai·ruhl cuddle) is a command line
+- [Realm Operations](/cli/spirlctl/realm-operations.md): This guide covers the complete lifecycle of managing realms with spirlctl, including creating realms, assigning team administrators, and understanding realm-scoped access control.
+- [Service Accounts](/cli/spirlctl/service-accounts.md): This guide covers the complete lifecycle of managing service accounts
+- [Signing Key Rotation](/cli/spirlctl/signing-key-rotation.md): Rotate deployment signing keys on demand with spirlctl.
+- [Trust Domain Operations](/cli/spirlctl/trust-domain-operations.md): This guide covers the complete lifecycle of managing SPIFFE trust
+- [Workload Identity Federation (WIF) Issuer Operations](/cli/spirlctl/wif-issuer-operations.md): Manage OIDC providers your org trusts for secretless auth.
+- [spirldbg cli utility](/cli/spirldbg.md): Debugging utility for SPIFFE workload APIs.
+
+## iam
+
+- [Identity and Access Management](/iam.md): Role-based authorization for people and services.
+- [Enterprise SSO Configuration](/iam/enterprise-sso.md): Configure OIDC-based single sign-on.
+- [Roles in Defakto](/iam/roles.md): Role-based permissions for users and services.
+- [Service Accounts](/iam/service-accounts.md): Non-human identities for automation.
+- [Support Access](/iam/support-access.md): Manage Defakto support team access.
+- [Secretless Terraform Authentication](/iam/terraform-wif.md): Authenticate the Terraform provider without long-lived keys.
+- [Workload Identity Federation (WIF) Issuers](/iam/wif-issuers.md): Register OIDC providers your org trusts for secretless auth.
+
+## ledger
+
+- [Ledger](/ledger.md): Secret Discovery and Eradication
+- [Ledger Concepts](/ledger/concepts.md): How Ledger discovers and eradicates secrets.
+- [Integrations](/ledger/integrations.md): Connect Ledger to cloud providers and services.
+- [Anthropic Integration](/ledger/integrations/anthropic.md): Integrate Ledger with Anthropic.
+- [AWS Integration](/ledger/integrations/aws.md): Integrate Ledger with AWS.
+- [Amazon Bedrock AgentCore Integration](/ledger/integrations/bedrock.md): Integrate Ledger with Amazon Bedrock AgentCore.
+- [Microsoft Entra / Azure Integration](/ledger/integrations/entra-azure.md): Integrate Ledger with Microsoft Entra and Azure.
+- [Gemini Enterprise Agent Platform Integration](/ledger/integrations/gemini-eap.md): Integrate Ledger with Gemini Enterprise Agent Platform.
+- [Kubernetes Integration](/ledger/integrations/kubernetes.md): Integrate Ledger with Kubernetes.
+- [OpenAI Integration](/ledger/integrations/openai.md): Integrate Ledger with OpenAI.
+- [Remediations](/ledger/remediations.md): Ledger remediations for secret eradication.
+- [Deactivation](/ledger/remediations/deactivation.md): Remove unnecessary secrets.
+- [Migration](/ledger/remediations/migration.md): Migrate a static secret to a Mint identity.
+- [Risk Scoring](/ledger/risk-scoring.md): Default scores and the scoring methodology.
+
+## mint
+
+- [Mint](/mint.md): Workload identity for non-human identities.
+- [Defakto and Workload Identity](/mint/concepts/defakto-workload-identity.md): Introduction
+- [Realms](/mint/concepts/realms.md): Realms provide a way to organize clusters within a trust domain and delegate access control to teams. They introduce an optional additional hierarchical level in the Defakto organizational structure, enabling secure, scalable delegation of administrative control.
+- [Terminology](/mint/concepts/terminology.md): This glossary defines key terms used throughout Defakto's
+- [Configuration](/mint/configuration.md): Control SVID issuance, signing keys, attestation, and telemetry.
+- [Agent Configuration](/mint/configuration/agent-configuration.md): Attestation policies for agents and workloads.
+- [AWS Identity Document](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-aws-iid.md): The AWS Identity Document method is for agents running on AWS EC2 instances. The agent fetches its Instance Identity Document (IID) from the EC2 metadata service as a cryptographically signed blob; the Trust Domain Server verifies the signature using AWS public signing keys and confirms the instance is in a running state.
+- [AWS Web Identity Token](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-aws-token.md): The AWS Web Identity Token method authenticates agents using AWS IAM Outbound Identity Federation. The agent exchanges its IAM role credentials for a short-lived JWT; the Trust Domain Server verifies the JWT using the AWS account's OIDC discovery endpoint.
+- [Azure IMDS](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-azure-imds.md): The Azure IMDS method attests agents using the Azure Instance Metadata Service attested document. Unlike Azure MSI, this method does not require the VM to have a Managed Identity assigned, making it usable for a broader set of Azure workloads.
+- [Azure Managed Identity (MSI)](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-azure-msi.md): The Azure MSI method authenticates agents using Azure Managed Identity. The agent fetches a managed identity access token from the Azure Instance Metadata Service (IMDS); the Trust Domain Server verifies the token's authenticity using Azure Entra's OIDC discovery endpoint.
+- [Custom JWT](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-custom-jwt.md): The Custom JWT method authenticates agents using a JSON Web Token (JWT) from any OIDC-compatible or custom issuer. The agent presents a JWT to the Trust Domain Server. The server validates its signature, issuer, audience, and optionally enforces claim requirements.
+- [Agent Attestation Extension](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-extension.md): The Agent Attestation Extension extends the agent attestation process using two cooperating components:
+- [GCP Instance Identity Token](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-gcp-iit.md): The GCP Instance Identity Token method attests agents running on Google Cloud Compute Engine VMs. The agent queries the instance metadata service for its signed identity token; the Trust Domain Server verifies the token's authenticity using GCP's public signing keys, then optionally queries the Compute Engine API for additional VM metadata.
+- [HTTP DNS](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-http-dns.md): The HTTP DNS method authenticates an agent by verifying it controls a given hostname. The agent advertises a hostname and port to the Trust Domain Server; the server issues a nonce challenge and then makes an outbound HTTP request to confirm the agent's endpoint is serving that nonce.
+- [Kubernetes Service Account Token](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-k8s-token.md): The Kubernetes Service Account Token method authenticates agents running in a Kubernetes cluster by verifying the agent's service account token. The agent sends its token to the Trust Domain Server; the server verifies it against the cluster's OIDC issuer.
+- [Agent Attestation Methods](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-methods-overview.md): Agent attestation methods are the mechanisms by which the Trust Domain Server verifies the identity of an agent at login time. The server issues a session to the agent only if the agent satisfies the configured attestation requirements.
+- [SSH Proof of Possession](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-ssh-pop.md): The SSH PoP method attests agents using an SSH host certificate. The agent proves possession of the host's SSH private key by signing a challenge using a dual-nonce protocol; the Trust Domain Server validates the certificate against a set of trusted SSH CAs.
+- [TPM Device Identity](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-tpm-devid.md): The TPM Device Identity (DevID) method attests agents running on hosts that have been provisioned with a Trusted Platform Module (TPM) and a DevID certificate. Trust is anchored in an externally-issued identity certificate bound to a TPM-resident key. The agent proves both that it controls the DevID private key and that the key physically resides in a specific TPM chip.
+- [TPM Endorsement Key](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-tpm-ek.md): The TPM Endorsement Key (TPM EK) method attests agents running on hosts equipped with a Trusted Platform Module. Unlike certificate-based methods, TPM EK attestation anchors trust directly in the TPM hardware: the agent proves it is running on a specific TPM chip whose Endorsement Key (EK) is trusted by the Trust Domain Server.
+- [X.509 Proof of Possession](/mint/configuration/agent-configuration/agent-attestation-methods/agent-attestation-x509-pop.md): The X.509 Proof of Possession (X.509 PoP) method attests agents that have been provisioned with an X.509 certificate through an out-of-band mechanism. The Trust Domain Server verifies that the certificate chains to a trusted CA, then issues a cryptographic challenge to confirm the agent holds the corresponding private key.
+- [Attribute Redaction](/mint/configuration/agent-configuration/workload-attestation-attribute-redaction.md): Attribute redaction lets you control which workload attributes the agent sends to the Trust Domain Server when a workload requests an SVID. By default, all collected attributes are sent. When redaction is configured, only attributes matching an allowlist are forwarded — all others are dropped at the agent.
+- [Workload Attestation Methods](/mint/configuration/agent-configuration/workload-attestation-methods.md): Methods for verifying workload identity.
+- [Docker Workload Attestor](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-docker.md): Identify workloads running inside Docker or Podman containers.
+- [Workload Attestation Extension](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-extension.md): Extend workload attestation via webhook.
+- [JWT Workload Attestor](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-jwt.md): Identify workloads via JWT tokens from trusted issuers.
+- [Kubernetes Workload Attestor](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-kubernetes.md): Identify workloads via the Kubernetes API.
+- [Linux Workload Attestor](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-linux.md): Identify workloads via kernel process information.
+- [Linux systemd Workload Attestor](/mint/configuration/agent-configuration/workload-attestation-methods/workload-attestation-systemd.md): Identify workloads managed by Linux systemd.
+- [Managed Configuration](/mint/configuration/managed-config.md): Centrally manage cluster settings.
+- [AWS Web Identity Token](/mint/configuration/serverless-configuration/serverless-attestation-aws-token.md): The AWS Web Identity Token method authenticates workloads using AWS IAM Outbound Identity Federation. The workload exchanges its IAM role credentials for a short-lived JWT; the Trust Domain Server verifies the JWT using the AWS account's OIDC discovery endpoint.
+- [Azure Managed Identity (MSI)](/mint/configuration/serverless-configuration/serverless-attestation-azure-msi.md): The Azure MSI method authenticates workloads using Azure Managed Identity. The workload fetches a managed identity access token from the Azure Instance Metadata Service (IMDS); the Trust Domain Server verifies the token's authenticity using Azure Entra's OIDC discovery endpoint.
+- [Custom JWT](/mint/configuration/serverless-configuration/serverless-attestation-custom-jwt.md): Attest serverless workloads with a JWT from any issuer.
+- [Serverless Attestation Extension](/mint/configuration/serverless-configuration/serverless-attestation-extension.md): Extend serverless attestation with a custom webhook.
+- [GCP Instance Identity Token](/mint/configuration/serverless-configuration/serverless-attestation-gcp-iit.md): The GCP Instance Identity Token method attests workloads running on Google Cloud. The workload queries the instance metadata service for its signed identity token; the Trust Domain Server verifies the token's authenticity using GCP's public signing keys.
+- [Serverless](/mint/configuration/serverless-configuration/serverless-configuration-overview.md): The serverless feature allows workloads without access to a SPIFFE Unix Domain Socket to receive SVIDs and bundles. Instead of using an agent to identify the workload by introspecting the underlying platform, the workload provides their own proofs.
+- [SDK Examples](/mint/configuration/serverless-configuration/serverless-sdk-examples.md): Fetch SVIDs in serverless environments using the Defakto SDKs.
+- [SVID Issuance and Signing](/mint/configuration/svid-issuance.md): SPIFFE IDs, certificates, JWTs, and key management.
+- [JWT-SVID Customization](/mint/configuration/svid-issuance/jwt-svid-customization.md): Configure JWT claims and audience values.
+- [Key Manager](/mint/configuration/svid-issuance/key-manager.md): Store signing keys in an external KMS or HSM.
+- [AWS KMS Key Manager](/mint/configuration/svid-issuance/key-manager/key-manager-aws-kms.md): Store signing keys in AWS KMS.
+- [Azure Key Vault Key Manager](/mint/configuration/svid-issuance/key-manager/key-manager-azure-key-vault.md): Store signing keys in Azure Key Vault.
+- [Key Manager Extension](/mint/configuration/svid-issuance/key-manager/key-manager-extension.md): Integrate any KMS or HSM via webhook.
+- [GCP Cloud KMS Key Manager](/mint/configuration/svid-issuance/key-manager/key-manager-gcp-cloud-kms.md): Store signing keys in Google Cloud KMS.
+- [Key Wrapping](/mint/configuration/svid-issuance/key-wrapping.md): Encrypt signing keys at rest with an external KMS.
+- [AWS KMS Key Wrapping](/mint/configuration/svid-issuance/key-wrapping/key-wrapping-aws-kms.md): Encrypt signing keys at rest with AWS KMS.
+- [Azure Key Vault Key Wrapping](/mint/configuration/svid-issuance/key-wrapping/key-wrapping-azure-key-vault.md): Encrypt signing keys at rest with Azure Key Vault.
+- [GCP Cloud KMS Key Wrapping](/mint/configuration/svid-issuance/key-wrapping/key-wrapping-gcp-cloud-kms.md): Encrypt signing keys at rest with Google Cloud KMS.
+- [SPIFFE ID templates](/mint/configuration/svid-issuance/spiffe-id-templates.md): Customize the path structure of SPIFFE IDs.
+- [SVID Issuance Policy](/mint/configuration/svid-issuance/svid-issuance-policy.md): Managed configuration of SVID TTLs, subjects, and path templates, with optional per-workload overrides.
+- [Upstream Certificate Authority](/mint/configuration/svid-issuance/upstream-ca.md): Chain SVIDs to your organization's root CA.
+- [AWS Private CA](/mint/configuration/svid-issuance/upstream-ca/upstream-ca-aws-pca.md): Issue SVIDs chained to AWS Private CA.
+- [Upstream Authority Extension](/mint/configuration/svid-issuance/upstream-ca/upstream-ca-extension.md): Integrate any CA via webhook.
+- [GCP Certificate Authority Service](/mint/configuration/svid-issuance/upstream-ca/upstream-ca-gcp-cas.md): Issue SVIDs chained to GCP Certificate Authority Service.
+- [WIT-SVID (Workload Identity Token)](/mint/configuration/svid-issuance/wit-svid.md): Proof-of-possession bound workload tokens.
+- [WIT-SVID Configuration](/mint/configuration/svid-issuance/wit-svid/wit-svid-configuration.md): Configure WIT-SVID TTL and additional claims.
+- [Fetching a WIT-SVID](/mint/configuration/svid-issuance/wit-svid/wit-svid-fetching.md): Fetch and debug WIT-SVIDs from a workload.
+- [Enable and Provision WIT-SVID](/mint/configuration/svid-issuance/wit-svid/wit-svid-setup.md): Enable WIT-SVID and provision its signing key.
+- [X.509-SVID Customization](/mint/configuration/svid-issuance/x509-svid-customization.md): Configure X.509 certificate fields and extensions.
+- [Telemetry](/mint/configuration/telemetry.md): Metrics, audit logging, and observability.
+- [Audit Logging (OCSF)](/mint/configuration/telemetry/spirl-telemetry-audit-logging.md): Emit OCSF audit events to your SIEM.
+- [Metrics Collection](/mint/configuration/telemetry/spirl-telemetry-metrics.md): Defakto components can optionally collect metrics and expose them in a Prometheus metrics endpoint.
+- [Token Exchange](/mint/configuration/token-exchange.md): Exchange credentials on the /oauth/token endpoint.
+- [Delegation](/mint/configuration/token-exchange/delegation/delegation-overview.md): Exchange a user's token for a delegated JWT-SVID.
+- [OAuth Access Tokens](/mint/configuration/token-exchange/oauth-access-tokens/oauth-access-tokens-overview.md): Exchange a JWT-SVID for an OAuth access token.
+- [Developer Identity](/mint/dev-id/overview.md): Defakto Developer Identity allows you to get SPIFFE Verifiable Identity Documents (SVIDs) for developers.
+- [Setup](/mint/dev-id/setup.md): Prerequisites
+- [Fetch](/mint/dev-id/usage/fetch.md): Defakto Developer Identity allows developers to fetch SVIDs and bundles locally for development and integration purposes. See serve for a dynamic Workload API variant.
+- [Serve](/mint/dev-id/usage/serve.md): An X509 SVID or a JWT SVID may be served at any time via the Developer Identity Workload API, but not both simultaneously.
+- [Guides](/mint/guides.md): In-depth technical guides for Defakto platform topics.
+- [Signing Key Management](/mint/guides/signing-key-management.md): Key management options and upstream certificate authorities.
+- [Signing Key Rotation](/mint/guides/signing-key-rotation.md): How signing keys rotate through the keyset lifecycle.
+- [Install](/mint/install.md): Installation guides for Defakto components.
+- [Network Requirements](/mint/install/endpoints.md): Endpoints to allow before installing Defakto.
+- [Optional Components](/mint/install/optional-components.md): Additional components for specialized use cases.
+- [SPIRL Bridge](/mint/install/optional-components/spirl-bridge.md): SPIRL Bridge is a sidecar service that provides SPIFFE SVIDs (X.509
+- [Install SPIRL Agent](/mint/install/spirl-agent.md): Deploy the agent on your platform.
+- [Logs](/mint/install/spirl-agent/agent-logging.md): Configure and interpret agent log output.
+- [Agent TLS configuration](/mint/install/spirl-agent/agent-tls.md): How the agent trusts the Trust Domain Server.
+- [Installing Defakto Agent using Docker](/mint/install/spirl-agent/docker.md): Run the agent as a Docker container.
+- [Kubernetes](/mint/install/spirl-agent/kubernetes.md): Deploy the agent on Kubernetes via Helm.
+- [Installing Defakto Agent on Linux](/mint/install/spirl-agent/linux.md): Install the agent on Debian, Ubuntu, or RHEL.
+- [Install Trust Domain Server](/mint/install/spirl-server.md): Deploy and configure Trust Domain Servers.
+- [Deploy Defakto Agent](/mint/install/spirl-server/deploy-spirl-agent.md): Deploy the agent to start issuing identities.
+- [Deploy Trust Domain Servers](/mint/install/spirl-server/deploy-td-servers.md): Install Trust Domain Servers via Helm.
+- [Architecture, Prerequisites, and Process](/mint/install/spirl-server/process.md): Architecture overview, requirements, and steps.
+- [Register SPIFFE Trust Domain](/mint/install/spirl-server/register_trust_domain.md): Register a self-hosted trust domain.
+- [Register Cluster with Trust Domain Server](/mint/install/spirl-server/register-cluster.md): Register a cluster with the trust domain.
+- [Logs](/mint/install/spirl-server/server-logging.md): Configure and interpret server log output.
+- [Server Key Rotation](/mint/install/spirl-server/server-rotation.md): Automatic signing key rotation behavior.
+- [Verifying Trust Domain Servers Connectivity](/mint/install/spirl-server/verify-td-servers.md): Confirm servers are connected to the control plane.
+- [Verify SPIFFE Workload API and SVID Issuance](/mint/install/spirl-server/verify-workload-api.md): Confirm workloads can retrieve SVIDs.
+- [Integration](/mint/integration.md): Connect Defakto with your infrastructure and services.
+- [Integration with AWS API Gateway](/mint/integration/apigateway.md): Sync mTLS trust stores with AWS API Gateway.
+- [AWS](/mint/integration/aws.md): Federate Defakto credentials with AWS services.
+- [Using AWS ALB with Defakto Server](/mint/integration/aws/alb.md): Expose Trust Domain Servers via AWS ALB.
+- [Azure](/mint/integration/azure.md): Federate Defakto credentials with Azure services.
+- [Tutorial: Azure Federation](/mint/integration/azure/tutorial-azure-federation.md): Authenticate to Azure APIs using JWT-SVIDs.
+- [CI/CD](/mint/integration/ci-cd.md): Issue SPIFFE identities to CI/CD pipelines.
+- [Issuing SVIDs to CI/CD Jobs](/mint/integration/ci-cd/ci-cd-svid-issuance.md): Configure CI/CD profiles and SPIFFE ID mapping.
+- [GitHub Integration Quick Start](/mint/integration/ci-cd/github.com.md): SPIFFE identities for GitHub Actions runners.
+- [Gitlab Integration for Self-Hosted Runners on a VM](/mint/integration/ci-cd/gitlab.com.md): SPIFFE identities for GitLab self-hosted runners.
+- [Jenkins Integration Quick Start](/mint/integration/ci-cd/jenkins.md): SPIFFE identities for Jenkins pipelines.
+- [GCP](/mint/integration/gcp.md): Federate Defakto credentials with GCP services.
+- [Tutorial: GCP Federation](/mint/integration/gcp/tutorial-gcp-federation.md): Authenticate to GCP APIs using JWT-SVIDs.
+- [Integrating SPIFFE in your environment](/mint/integration/integration.md): Configure SPIFFE Workload API access on Kubernetes.
+- [Integrating Defakto with Istio](/mint/integration/istio.md): Deploy Defakto alongside Istio service mesh.
+- [Tutorial: AWS Federation](/mint/integration/tutorial-aws-federation.md): Authenticate to AWS APIs using JWT-SVIDs.
+- [Tutorial: Anthropic Claude Federation](/mint/integration/tutorial-claude-federation.md): Authenticate workloads to Claude using JWT-SVIDs.
+- [Tutorial: OpenAI Workload Identity Federation](/mint/integration/tutorial-openai-federation.md): Authenticate workloads to OpenAI using JWT-SVIDs.
+- [Integrate Defakto with Venafi Firefly](/mint/integration/venafi.md): Integrate Trust Domain Servers with Venafi.
+- [Configure Firefly](/mint/integration/venafi/configure-firefly.md): This section describes how to configure Trust Domain Servers to use Firefly. For more information about Firefly configuration, see Firefly Configuration Documentation.
+- [Deploy Defakto Agent to the Cluster](/mint/integration/venafi/deploy-spirl-agent.md): Required values for Helm chart
+- [Deploy Trust Domain Servers](/mint/integration/venafi/deploy-td-servers.md): You'll use the Trust Domain Servers Helm chart to deploy Trust Domain Servers in your Kubernetes cluster.
+- [Architecture, Prerequisites, and Process](/mint/integration/venafi/process.md): Architecture
+- [Register SPIFFE Trust Domain](/mint/integration/venafi/register_trust_domain.md)
+- [Register Cluster with Trust Domain Server](/mint/integration/venafi/register-cluster.md)
+- [Verify Firefly Connectivity to Control Plane](/mint/integration/venafi/verify-firefly.md): You can check Firefly container logs to verify that Firefly is connected to the Venafi Control Plane and get intermediate certificates signed.
+- [Verifying Trust Domain Servers Connectivity](/mint/integration/venafi/verify-td-servers.md)
+- [Verify SPIFFE Workload API and SVID Issuance](/mint/integration/venafi/verify-workload-api.md)
+- [Operations](/mint/operations.md): This section provides guidance on understanding the Defakto Security Platform from an operations, monitoring, and troubleshooting perspective.
+- [Defakto Agent Metrics](/mint/operations/agent-metrics.md): This guide covers metrics collection, configuration, and monitoring for Defakto Agents. Agents expose Prometheus-compatible metrics for workload identity delivery, control plane connectivity, and resource utilization.
+- [Kubernetes Metrics](/mint/operations/kubernetes-platform-monitoring.md): This guide focuses on monitoring the Kubernetes platform itself: Pod health, resource utilization, node status, and cluster state. These metrics are essential for understanding the runtime health of any Kubernetes workload, including Defakto components.
+- [Resource Sizing](/mint/operations/resource-sizing.md): Per-component memory and CPU recommendations.
+- [Defakto Agent Runbook](/mint/operations/runbook-agent.md): This runbook provides diagnostic and remediation steps for operational issues with SPIRL Agents. Use it when workloads are not receiving credentials, when agent metrics indicate issues, or when agents appear disconnected from Trust Domain Servers.
+- [Defakto Trust Domain Server Runbook](/mint/operations/runbook-server.md): This runbook provides diagnostic and remediation steps for operational
+- [Signing Key Rotation Runbook](/mint/operations/runbook-signing-key-rotation.md): Step-by-step procedure for a planned signing keyset rotation.
+- [Trust Domain Server Metrics](/mint/operations/server-metrics.md): This guide covers metrics collection, configuration, and monitoring for Trust Domain Servers. Servers expose Prometheus-compatible metrics for SVID operations, attestations, gRPC performance, and resource utilization.
+- [Grafana Dashboards](/mint/operations/spirl-telemetry-dashboards.md): Defakto components can be used with Grafana to visualize operational health of trust domains and clusters using pre-built dashboards. This page describes how to use Grafana with official Defakto operational dashboard templates.
+- [Grouping Logs by Request](/mint/operations/spirl-telemetry-log-grouping.md): Defakto groups many request-related logs by spanid and traceid.
+- [Running performance tests on the Trust Domain Server](/mint/performance/spirl-perf.md): spirl-perf is a tool to run performance tests on the Trust Domain Server that simulate load with a large number of Defakto Agents. With spirl-perf you can simulate agents logging in to the Trust Domain Server and agents requesting an x509 SVID.
+- [Quick Start](/mint/quick-start.md): This tutorial walks you through setting up Defakto in a demo environment. By the end, you will have a Kubernetes cluster issuing SPIFFE identities to workloads automatically.
+- [Add a Kubernetes Cluster](/mint/quick-start/add-k8s-to-trust-domain.md): Before you begin
+- [Cleaning everything up](/mint/quick-start/clean-up.md): Follow these steps in order. The trust domain cannot be deleted while clusters are still registered to it.
+- [Create a SPIFFE Trust Domain](/mint/quick-start/create-trust-domain.md): To provision a new Defakto-managed trust domain, type the following:
+- [Download spirlctl](/mint/quick-start/download-spirlctl.md): Using homebrew
+- [Login to Defakto](/mint/quick-start/login.md): Defakto uses a standard OAuth login rather than requiring you to
+- [See it in Action](/mint/quick-start/see-it-in-action.md): To deploy the spiffe-demo-app, you’ll need Helm installed.
+- [Downtime Protection](/mint/reflector.md): This feature is in private preview and is not publicly available.
+- [Configuration Reference](/mint/reflector/configuration-reference.md): Helm values and runtime settings.
+- [Install SPIRL Reflector](/mint/reflector/install-reflector.md): Deploy the credential caching proxy.
+- [Monitoring SPIRL Reflector](/mint/reflector/monitoring-reflector.md): Monitor Reflector health and performance.
+
+## releases
+
+- [Releases](/releases.md): Release history and version notes.
+- [Compatibility matrix](/releases/compatibility-matrix.md): Validated agent and trust domain server version pairs.
+- [Defakto end of life](/releases/end-of-life.md): Component end-of-life schedule.
+- [spirl-perf Releases](/releases/spirl-perf.md): Release history for the load testing tool.
+- [SPIRL Go SDK Releases](/releases/spirl-sdk-go.md): Release history for the Go SDK.
+- [SPIRL Server Releases](/releases/spirl-server.md): Release history for Trust Domain Server.
+- [spirl-sync Releases](/releases/spirl-sync.md): Release history for the sync tool.
+- [SPIRL System Releases](/releases/spirl-system.md): Release history for agent-side components.
+- [spirlctl Releases](/releases/spirlctl.md): Release history for the Defakto CLI.
+- [spirldbg Releases](/releases/spirldbg.md): Release history for the debug utility.
+- [Terraform Provider Releases](/releases/terraform-provider.md): Release history for the Terraform provider.

@@ -1,0 +1,88 @@
+generated: '2026-08-12'
+method: searched
+source: https://d.defakto.security/mint/quick-start.md
+docs:
+- https://d.defakto.security/mint/quick-start.md
+- https://d.defakto.security/mint/quick-start/see-it-in-action.md
+- https://d.defakto.security/mint/quick-start/clean-up.md
+note: >-
+  There is no hosted sandbox, no test-mode API host and no test credential scheme — the
+  concepts do not apply to this product. What Defakto ships instead is a bring-your-own-cluster
+  demo environment: a documented quick start that provisions a real trust domain against the
+  real control plane, registers a real Kubernetes cluster, and deploys a demo workload that
+  displays the certificates and JWTs actually being minted for it. Credentials are real, and a
+  Defakto account is required to run it, so this is a guided first-run rather than a sandbox.
+  No test cards, magic identifiers, test clocks or fixture tooling exist, and none are
+  invented here.
+type: self-provisioned-demo
+hosted_sandbox: false
+test_mode: false
+test_credentials: false
+account_required: true
+signup: https://www.defakto.security/demo/
+signup_note: >-
+  Self-service signup was not found. The only public entry point is a "Request a Demo" form,
+  so obtaining an account is a sales-gated step even though the quick start itself is
+  fully documented.
+prerequisites:
+- A Defakto organization (obtained via the demo request).
+- spirlctl installed (brew tap spirl/tap && brew install spirlctl).
+- A Kubernetes cluster you control.
+- Helm.
+walkthrough:
+- step: 1
+  name: Download spirlctl
+  url: https://d.defakto.security/mint/quick-start/download-spirlctl.md
+- step: 2
+  name: Login to Defakto
+  detail: Standard OAuth browser login rather than a pasted API key.
+  url: https://d.defakto.security/mint/quick-start/login.md
+- step: 3
+  name: Create a SPIFFE trust domain
+  command: spirlctl trust-domain create <domain>
+  url: https://d.defakto.security/mint/quick-start/create-trust-domain.md
+- step: 4
+  name: Add a Kubernetes cluster to the trust domain
+  url: https://d.defakto.security/mint/quick-start/add-k8s-to-trust-domain.md
+- step: 5
+  name: See it in action
+  detail: >-
+    Deploy the spiffe-demo-app via Helm and port-forward to inspect the X.509-SVIDs and
+    JWT-SVIDs being minted and served live.
+  url: https://d.defakto.security/mint/quick-start/see-it-in-action.md
+- step: 6
+  name: Clean up
+  detail: >-
+    Ordered teardown. Documented constraint worth noting — a trust domain cannot be deleted
+    while clusters are still registered to it.
+  url: https://d.defakto.security/mint/quick-start/clean-up.md
+demo_application:
+  name: spiffe-demo-app
+  helm_repo: https://spirl.github.io/spiffe-demo-app
+  install: |
+    helm repo add spiffe-demo https://spirl.github.io/spiffe-demo-app
+    helm -n spiffe-demo install spiffe-demo spiffe-demo/spiffe-demo-app --create-namespace
+  access: kubectl -n spiffe-demo port-forward svc/spiffe-demo-service 8080:80
+  source: https://github.com/spirl/spiffe-demo-app
+  latest_release: spiffe-demo-app-0.4.4
+  released: '2026-06-05'
+  purpose: Displays the certificates and JWT tokens Defakto mints and serves to the workload.
+verification_tooling:
+- tool: spirldbg
+  method: >-
+    Deploy a one-shot pod carrying the label `k8s.spirl.com/spiffe-csi: enabled` so the Defakto
+    admission controller injects the Workload API socket, then read the SVID from the CLI.
+  docs: https://d.defakto.security/cli/spirldbg.md
+- tool: spiffecli
+  method: Runs a SPIFFE Workload API locally and requests and validates SVIDs.
+  source: https://github.com/defakto-security/spiffecli
+- tool: spirl-perf
+  method: >-
+    Load-test harness that simulates a large number of agents logging in and requesting
+    X.509 SVIDs against a Trust Domain Server.
+  docs: https://d.defakto.security/mint/performance/spirl-perf.md
+examples_repo:
+  name: defakto-examples
+  url: https://github.com/spirl/defakto-examples
+  description: Examples for customer deployments.
+  last_push: '2026-07-26'

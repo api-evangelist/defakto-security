@@ -1,0 +1,118 @@
+// Reconstructed by API Evangelist from the published protoc-gen-go bindings in
+// https://github.com/spirl/spirl-sdk-go (api/v1/workloadsapi/api.proto).
+//
+// Defakto does not publish .proto sources. Message names, field names, field numbers,
+// field types, doc comments, enum values and RPC signatures below are read verbatim
+// out of those generated files, so they are accurate. This is a faithful
+// RECONSTRUCTION, not a provider-published artifact, and it is lossy in known ways:
+//   * oneof groups are NOT represented. protoc-gen-go emits them as Go interface
+//     fields tagged protobuf_oneof rather than protobuf, so their member fields are
+//     absent here. A message shown with no fields may be a genuinely empty message
+//     (common for Delete*Response) OR a oneof-only message. Check the .pb.go.
+//   * field options (protovalidate constraints, deprecation) are not carried.
+//   * nested and map entry types are flattened to their leaf name.
+// Do not treat this as a compilable contract; treat it as an accurate inventory of
+// the service surface. Source of truth remains the SDK.
+syntax = "proto3";
+
+package com.spirl.api.v1.workloads;
+
+import "google/protobuf/timestamp.proto";
+
+enum BreakdownDimension {
+  BREAKDOWN_DIMENSION_UNSPECIFIED = 0;
+  BREAKDOWN_DIMENSION_SVID_TYPE = 1;
+  BREAKDOWN_DIMENSION_ISSUER_TYPE = 2;
+}
+
+enum FilterOperator {
+  FILTER_OPERATOR_UNSPECIFIED = 0;
+  FILTER_OPERATOR_EQUAL = 1;
+  FILTER_OPERATOR_NOT_EQUAL = 2;
+  FILTER_OPERATOR_PREFIX = 3;
+}
+
+message FieldFilter {
+  // Required. Field to filter by.
+  string field = 1;
+  // Required. Filter operator.
+  FilterOperator operator = 2;
+  // Required. Value to filter by.
+  string value = 3;
+}
+
+message ListTrustDomainWorkloadsRequest {
+  // Required. Trust domain ID.
+  string trust_domain_id = 1;
+  // Required. Page size (1-1000).
+  uint32 page_size = 2;
+  // Optional. Page token for cursor-based pagination.
+  string page_token = 3;
+  // Timeframe for credentials_issued count. Defaults to the last 30 days.
+  google.protobuf.Timestamp issued_from = 4;
+  google.protobuf.Timestamp issued_to = 5;
+  // Optional breakdown dimensions to include in each workload. Empty = totals per spiffe_id
+  // only.
+  repeated BreakdownDimension breakdowns = 6;
+  // When true, response includes TrustDomainWorkloadsSummary with totals across all matching
+  // workloads (not just this page).
+  bool include_summary = 7;
+  // Optional. Filters to narrow the query. Supported fields: - spiffe_id (operators: EQUAL,
+  // PREFIX) - issuer_parent_id (operator: EQUAL)  Multiple filters are combined with AND logic.
+  repeated FieldFilter query_filters = 8;
+}
+
+message ListTrustDomainWorkloadsResponse {
+  repeated TrustDomainWorkload workloads = 1;
+  // Empty string indicates the final page.
+  string next_page_token = 2;
+  // Only populated when include_summary = true in the request.
+  TrustDomainWorkloadsSummary summary = 3;
+}
+
+message TrustDomainWorkload {
+  string spiffe_id = 1;
+  // Credentials issued within issued_from/issued_to. Counted as value_count(svid_hash)
+  uint64 credentials_issued = 2;
+  // Currently active (non-expired) credentials.
+  uint64 active_credentials = 3;
+  // Most recent issued_at across all credentials (unbounded by time range).
+  google.protobuf.Timestamp last_issued = 4;
+  // Latest expires_at across all credentials (unbounded by time range).
+  google.protobuf.Timestamp expires_at = 5;
+  // Populated only if BREAKDOWN_DIMENSION_SVID_TYPE was requested.
+  SvidTypeBreakdown by_svid_type = 6;
+  // Populated only if BREAKDOWN_DIMENSION_ISSUER_TYPE was requested.
+  IssuerTypeBreakdown by_issuer_type = 7;
+}
+
+message SvidTypeBreakdown {
+  BreakdownEntry x509 = 1;
+  BreakdownEntry jwt = 2;
+}
+
+message IssuerTypeBreakdown {
+  BreakdownEntry cluster = 1;
+  BreakdownEntry serverless = 2;
+  BreakdownEntry developer_id = 3;
+}
+
+message BreakdownEntry {
+  uint64 credentials_issued = 1;
+  uint64 active_credentials = 2;
+  google.protobuf.Timestamp last_issued = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message TrustDomainWorkloadsSummary {
+  // accurate up to 40k, then uses HLL
+  uint64 total_workloads = 1;
+  uint64 total_credentials_issued = 2;
+  uint64 total_active_credentials = 3;
+  // accurate up to 40k, then uses HLL
+  uint64 total_active_workloads = 4;
+}
+
+service API {
+  rpc ListTrustDomainWorkloads(ListTrustDomainWorkloadsRequest) returns (ListTrustDomainWorkloadsResponse);
+}
