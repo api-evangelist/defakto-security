@@ -1,0 +1,14 @@
+{
+  "repo": "defakto-security",
+  "feeds": [
+    {
+      "source": "https://d.defakto.security/mint/quick-start.md",
+      "feed_url": "https://d.defakto.security/mint/quick-start.md",
+      "title": "",
+      "saved": 0,
+      "method": "none"
+    }
+  ],
+  "post_count": 0,
+  "fetched": "2026-08-15T12:22:01Z"
+}
