@@ -14,7 +14,7 @@ url: https://raw.githubusercontent.com/api-evangelist/defakto-security/refs/head
 image: https://www.defakto.security/wp-content/uploads/2025/09/defakto-logo.svg
 x-type: company
 x-source: harvest:secondary-market
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-08-12'
 modified: '2026-08-12'
 tags:
