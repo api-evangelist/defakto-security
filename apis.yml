@@ -11,6 +11,17 @@ description: 'Defakto (formerly SPIRL) is a non-human identity (NHI) security co
   management API and the spirlctl CLI, with a Go SDK, an OpenTofu/Terraform provider, workload
   identity federation into AWS/Azure/GCP, and OCSF 1.8.0 audit logging.'
 url: https://raw.githubusercontent.com/api-evangelist/defakto-security/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://www.defakto.security/wp-content/uploads/2025/09/defakto-logo.svg
 x-type: company
 x-source: harvest:secondary-market
