@@ -59,6 +59,7 @@ tags:
 - gRPC
 - Machine Identity
 - Agentic AI
+- Developer Tools
 apis:
 - aid: defakto-security-management-api
   name: Defakto Management API
