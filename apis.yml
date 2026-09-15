@@ -1,15 +1,14 @@
 aid: defakto-security
 name: Defakto Security
-description: 'Defakto (formerly SPIRL) is a non-human identity (NHI) security company that
-  issues short-lived, cryptographically attested identities to workloads, services, CI/CD
-  pipelines and AI agents in place of static secrets, API keys and long-lived service accounts.
-  The platform is built on SPIFFE and ships two products: Mint, which runs Trust Domain Servers
-  and Agents that mint X.509-SVIDs, JWT-SVIDs and proof-of-possession WIT-SVIDs for Kubernetes,
-  Linux, Docker and serverless workloads under a dozen attestation methods; and Ledger, which
-  discovers, risk-scores and eradicates static secrets across AWS, Azure, GCP, Kubernetes,
-  Anthropic, OpenAI, Bedrock AgentCore and Gemini. The control plane is driven by a gRPC
-  management API and the spirlctl CLI, with a Go SDK, an OpenTofu/Terraform provider, workload
-  identity federation into AWS/Azure/GCP, and OCSF 1.8.0 audit logging.'
+description: 'Defakto (formerly SPIRL) is a non-human identity (NHI) security company that issues short-lived,
+  cryptographically attested identities to workloads, services, CI/CD pipelines and AI agents in place
+  of static secrets, API keys and long-lived service accounts. The platform is built on SPIFFE and ships
+  two products: Mint, which runs Trust Domain Servers and Agents that mint X.509-SVIDs, JWT-SVIDs and
+  proof-of-possession WIT-SVIDs for Kubernetes, Linux, Docker and serverless workloads under a dozen attestation
+  methods; and Ledger, which discovers, risk-scores and eradicates static secrets across AWS, Azure, GCP,
+  Kubernetes, Anthropic, OpenAI, Bedrock AgentCore and Gemini. The control plane is driven by a gRPC management
+  API and the spirlctl CLI, with a Go SDK, an OpenTofu/Terraform provider, workload identity federation
+  into AWS/Azure/GCP, and OCSF 1.8.0 audit logging.'
 url: https://raw.githubusercontent.com/api-evangelist/defakto-security/refs/heads/main/apis.yml
 deliveryModel:
   model: saas
@@ -61,16 +60,15 @@ tags:
 - Agentic AI
 - Developer Tools
 apis:
-- aid: defakto-security-management-api
+- aid: defakto-security:defakto-security-management-api
   name: Defakto Management API
-  description: 'The Defakto control-plane API. A gRPC service surface of sixteen versioned
-    services covering trust domains, clusters, realms, workloads, access policy, service
-    accounts and sessions, agent and provider attestation, CI/CD profiles, federation,
-    developer identity, managed configuration, alerts, statistics and the Ledger secret
-    scanner. It is the API behind the console at console.defakto.security and the spirlctl
-    CLI. There is no REST/OpenAPI surface: the transport is gRPC over HTTP/2 on port 443,
-    and the contract is distributed as generated client bindings in the Go SDK rather than
-    as published .proto files.'
+  description: 'The Defakto control-plane API. A gRPC service surface of sixteen versioned services covering
+    trust domains, clusters, realms, workloads, access policy, service accounts and sessions, agent and
+    provider attestation, CI/CD profiles, federation, developer identity, managed configuration, alerts,
+    statistics and the Ledger secret scanner. It is the API behind the console at console.defakto.security
+    and the spirlctl CLI. There is no REST/OpenAPI surface: the transport is gRPC over HTTP/2 on port
+    443, and the contract is distributed as generated client bindings in the Go SDK rather than as published
+    .proto files.'
   humanURL: https://d.defakto.security/
   baseURL: https://api.defakto.security
   tags:
@@ -123,13 +121,12 @@ apis:
     url: errors/defakto-security-problem-types.yml
   - type: DataModel
     url: data-model/defakto-security-data-model.yml
-- aid: defakto-security-legacy-management-api
+- aid: defakto-security:defakto-security-legacy-management-api
   name: SPIRL Management API (legacy)
-  description: 'The pre-rebrand SPIRL control-plane endpoint, still documented and still
-    serving the legacy app.spirl.com console and the spirlctl CLI alongside the current
-    api.defakto.security host. Same gRPC service surface; Defakto lists both hosts in its
-    published network-requirements allowlist, so the legacy host is live rather than
-    retired.'
+  description: The pre-rebrand SPIRL control-plane endpoint, still documented and still serving the legacy
+    app.spirl.com console and the spirlctl CLI alongside the current api.defakto.security host. Same gRPC
+    service surface; Defakto lists both hosts in its published network-requirements allowlist, so the
+    legacy host is live rather than retired.
   humanURL: https://d.defakto.security/mint/install/endpoints.md
   baseURL: https://api.spirl.com
   tags:
