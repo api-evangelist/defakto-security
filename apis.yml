@@ -42,7 +42,7 @@ x-type: company
 x-source: harvest:secondary-market
 specificationVersion: '0.23'
 created: '2026-08-12'
-modified: '2026-08-12'
+modified: '2026-09-16'
 tags:
 - Security
 - Identity
@@ -59,6 +59,7 @@ tags:
 - Machine Identity
 - Agentic AI
 - Developer Tools
+- Identity Federation
 apis:
 - aid: defakto-security:defakto-security-management-api
   name: Defakto Management API
