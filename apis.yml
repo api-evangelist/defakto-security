@@ -43,7 +43,28 @@ x-source: harvest:secondary-market
 specificationVersion: '0.23'
 created: '2026-08-12'
 modified: '2026-09-16'
+x-docs-platform: docusaurus
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-25
+x-docs-hosting: cloudflare-pages
 tags:
+- Security
+- Identity
+- Non-Human Identity
+- Workload Identity
+- SPIFFE
+- Authentication
+- Zero Trust
+- Secrets Management
+- Kubernetes
+- CI/CD
+- Cloud Security
+- gRPC
+- Machine Identity
+- AI Agents
+- Developer Tools
+- Identity Federation
+tags_raw:
 - Security
 - Identity
 - Non-Human Identity
