@@ -64,5 +64,116 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Defakto Security is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://forgeglobal.com/defakto-security_stock/
+Defakto (formerly SPIRL) is a non-human identity (NHI) security company that issues short-lived, cryptographically attested identities to workloads, services, CI/CD pipelines and AI agents in place of static secrets, API keys and long-lived service accounts. The platform is built on SPIFFE and ships two products: Mint, which runs Trust Domain Servers and Agents that mint X.509-SVIDs, JWT-SVIDs and proof-of-possession WIT-SVIDs for Kubernetes, Linux, Docker and serverless workloads under a dozen attestation methods; and Ledger, which discovers, risk-scores and eradicates static secrets across AWS, Azure, GCP, Kubernetes, Anthropic, OpenAI, Bedrock AgentCore and Gemini. The control plane is driven by a gRPC management API and the spirlctl CLI, with a Go SDK, an OpenTofu/Terraform provider, workload identity federation into AWS/Azure/GCP, and OCSF 1.8.0 audit logging.
+
+**Areas:** Security · Identity · Non-Human Identity · Workload Identity · SPIFFE · Authentication · Zero Trust · Secrets Management · Kubernetes · CI/CD · Cloud Security · gRPC
+
+## Defakto Security on APIs.io
+
+Everything profiled for Defakto Security is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/defakto-security/](https://apis.io/providers/defakto-security/)** — or go straight to one of the APIs or properties below.
+
+### APIs (2)
+
+- [Defakto Management API](https://apis.io/apis/defakto-security/defakto-security-management-api/) — The Defakto control-plane API. A gRPC service surface of sixteen versioned services covering trust domains, clusters, realms, workloads, access policy,…
+- [SPIRL Management API (legacy)](https://apis.io/apis/defakto-security/defakto-security-legacy-management-api/) — The pre-rebrand SPIRL control-plane endpoint, still documented and still serving the legacy app.spirl.com console and the spirlctl CLI alongside the current…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Defakto Security Audit Events](https://apis.io/asyncapis/defakto-security/defakto-security-audit-events/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Defakto Security Authentication](https://apis.io/security/defakto-security/defakto-security-authentication/)
+- [Defakto Security Domain Security](https://apis.io/security/defakto-security/defakto-security-domain-security/)
+- [Defakto Security Vulnerability Disclosure](https://apis.io/security/defakto-security/defakto-security-vulnerability-disclosure/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Defakto Security Plans Pricing](https://apis.io/plans/defakto-security/defakto-security-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Defakto Security Rate Limits](https://apis.io/rate-limits/defakto-security/defakto-security-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.defakto.security/)
+- [Documentation](https://d.defakto.security/)
+- [Getting started](https://d.defakto.security/mint/quick-start.md)
+- [API reference](https://d.defakto.security/cli/spirlctl/overview.md)
+- [Sign up](https://www.defakto.security/demo/)
+- [Support](https://www.defakto.security/contact/)
+- [Blog](https://www.defakto.security/blog/)
+- [Security](https://www.defakto.security/security/)
+- [Terms of service](https://www.defakto.security/terms-of-use/)
+- [Privacy policy](https://www.defakto.security/privacy-policy/)
+- [GitHub](https://github.com/defakto-security)
+
+## API Evangelist rating
+
+**Kin Score 48.1** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 39.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 36.8 |
+| Developer ergonomics | 74.4 |
+| Access clarity | 34.2 |
+
+**Agent readiness 23.9** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 30.4** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/defakto-security/](https://apis.io/providers/defakto-security/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Defakto Security: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/defakto-security/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
